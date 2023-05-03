@@ -75,8 +75,8 @@ impl ConfigEnv {
                 "ENCRYPT_KEY is required, please provide it by env variable ENCRYPT_KEY"
             ));
         }
-        let github_url = env::var("GITHUB_URL").unwrap_or("http://github.com/".to_string());
-        let doc_link = env::var("TNT_DOC_LINK").unwrap_or("http://github.com/".to_string());
+        let github_url = env::var("GITHUB_URL").unwrap_or_else(|_|"http://github.com/".to_string());
+        let doc_link = env::var("TNT_DOC_LINK").unwrap_or_else(|_|"http://github.com/".to_string());
         let rally_url = env::var("RALLY_URL");
         if rally_url.is_err() {
             return Err(anyhow!(
