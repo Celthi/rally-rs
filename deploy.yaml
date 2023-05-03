@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tnt
+  labels:
+    product: tnt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      product: tnt
+  template:
+    metadata:
+      labels:
+        product: tnt
+    spec:
+      containers:
+      - name: tnt
+        image: tnt:1.0
+        imagePullPolicy: IfNotPresent
+        env:   
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: tnt-config   
+              key: db_host
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: tnt-config
+              key: db_user
+        - name: DB_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: tnt-config
+              key: db_password
+        - name: GITHUB_TOKEN
+          valueFrom:
+            configMapKeyRef:
+              name: tnt-config   
+              key: github_token
+        - name: KAFKA_BROKER_LIST
+          valueFrom:
+            configMapKeyRef:
+              name: tnt-config
+              key: kafka_broker_list
+        - name: KAFKA_TP_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: tnt-config
+              key: kafka_tp_topic
+        - name: RALLY_URL
+          valueFrom:
+            configMapKeyRef:
+              name: tnt-config
+              key: rally_url
+        - name: TNT_DOC_LINK
+          valueFrom:
+            configMapKeyRef:
+              name: tnt-config
+              key: tnt_doc_link
+        - name: ENCRYPT_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: tnt-config
+              key: tnt_encrypt_key
+

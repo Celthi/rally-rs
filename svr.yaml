@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    product: tnt
+  name: tnt
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 30814
+    protocol: TCP
+    targetPort: 30814
+    nodePort: 30814
+
+  selector:
+    product: tnt
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}

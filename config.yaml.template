@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  github_token: <>
+  kafka_broker_list: <ip>:<port>
+  kafka_tp_topic: time_spent
+  db_host: <ip>
+  db_user: 
+  db_password: 
+  rally_url:
+  tnt_doc_link:
+  tnt_encrypt_key:
+kind: ConfigMap
+metadata:
+  name: tnt-config
+  namespace: default
