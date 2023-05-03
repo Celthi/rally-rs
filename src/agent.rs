@@ -12,16 +12,13 @@ pub async fn process(payload: &str) -> Result<()> {
         Ok(_) => {}
         Err(e) => {
             error!("processing time spent meet error: {:?}", e);
-            match (tp.get_repo_name(), tp.get_pr_number()) {
-                (Some(repo), Some(pr)) => {
-                    github::post_issue_comment(
-                        repo,
-                        pr,
-                        &format!("Error: {:?}\r\n\r\n{} ", e, config_env::doc_link()),
-                    )
-                    .await?;
-                }
-                _ => {}
+            if let (Some(repo), Some(pr)) = (tp.get_repo_name(), tp.get_pr_number()) {
+                github::post_issue_comment(
+                    repo,
+                    pr,
+                    &format!("Error: {:?}\r\n\r\n{} ", e, config_env::doc_link()),
+                )
+                .await?;
             }
         }
     }

@@ -70,6 +70,6 @@ async fn get_results<T: DeserializeOwned>(resp: Response) -> Result<T>
 }
 
 pub async fn fetch_object<T:DeserializeOwned>(ut: &UserToken, _ref: &str) -> Result<T> {
-    let url = format!("{_ref}");
+    let url = _ref.to_string();
     get::<T>(ut, &url).await
 }

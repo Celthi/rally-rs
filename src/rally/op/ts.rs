@@ -24,11 +24,8 @@ pub async fn add_time_spent(ut: &UserToken, tp: &TimeSpent) -> Result<()> {
             add_time_sheet(ut, &wp_id, tp).await?;
         }
         None => {
-            match (tp.get_repo_name(), tp.get_pr_number()) {
-                (Some(repo), Some(pr)) => {
-                    info!("No work product provided in the PR {}{}", repo, pr);
-                }
-                _ => {}
+            if let (Some(repo), Some(pr)) = (tp.get_repo_name(), tp.get_pr_number()) {
+                info!("No work product provided in the PR {}{}", repo, pr);
             }
             bail!("The PR title is not in the correct format: DExxxxx; blablala.")
         }
@@ -72,7 +69,12 @@ async fn add_time_entry_value(
     Ok(())
 }
 
-async fn create_update_value(item: &models::TimeEntryItem, ut: &UserToken, task_date: DateTime<Utc>, tp: &TimeSpent) -> Result<UpdateValue, anyhow::Error> {
+async fn create_update_value(
+    item: &models::TimeEntryItem,
+    ut: &UserToken,
+    task_date: DateTime<Utc>,
+    tp: &TimeSpent,
+) -> Result<UpdateValue, anyhow::Error> {
     let values = api::time::get_time_entry_values(ut, &item._ref).await?;
     let mut update_value = UpdateValue::new(task_date, tp.get_time_spent(), item._ref.clone());
     values.iter().for_each(|i| {
@@ -100,14 +102,11 @@ async fn get_task_and_time_entry_item(
     if !tis.is_empty() {
         for i in tis {
             let res = api::fetch_object::<SingleObjectModel>(ut, &i.Task._ref).await?;
-            match res {
-                SingleObjectModel::Task(t) => {
-                    if t.State != "Completed" {
-                        task = Some(t);
-                        item = Some(i);
-                    }
+            if let SingleObjectModel::Task(t) = res {
+                if t.State != "Completed" {
+                    task = Some(t);
+                    item = Some(i);
                 }
-                _ => {}
             }
         }
     }
