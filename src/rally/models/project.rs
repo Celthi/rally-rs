@@ -5,7 +5,6 @@ pub struct Project {
     pub _ref: String,
     pub _refObjectName: String,
     pub _refObjectUUID: String,
-
 }
 
 impl Project {

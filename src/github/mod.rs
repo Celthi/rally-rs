@@ -19,7 +19,7 @@ pub async fn post_issue_comment(repo_name: &str, pr_number: u64, s: &str) -> Res
     let client = reqwest::Client::new();
     let data = &PostComment { body: s };
 
-    match client
+    client
         .post(comment_url)
         .header(
             "Authorization",
@@ -28,12 +28,6 @@ pub async fn post_issue_comment(repo_name: &str, pr_number: u64, s: &str) -> Res
         .header("Accept", "application/vnd.github+json")
         .json(data)
         .send()
-        .await
-    {
-        Ok(_) => {
-            println!("{:?}", data);
-            Ok(())
-        }
-        Err(e) => Err(anyhow::anyhow!(format!("post comment failed {}", e))),
-    }
+        .await?;
+    Ok(())
 }

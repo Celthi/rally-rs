@@ -1,5 +1,5 @@
 use crate::config_env;
-use crate::{rally::models::RallyResult};
+use crate::rally::models::RallyResult;
 use crate::token::tokens::UserToken;
 
 use crate::rally::api;
@@ -19,4 +19,3 @@ pub async fn fetch_rally_user(ut: &UserToken, name: &str) -> Result<ObjectModel>
         ))),
     }
 }
-

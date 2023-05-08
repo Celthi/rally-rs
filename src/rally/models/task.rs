@@ -18,8 +18,6 @@ pub struct Task {
     pub _refObjectUUID: String,
 }
 
-
-
 #[derive(Clone)]
 pub struct CreateTask<'a> {
     name: String,

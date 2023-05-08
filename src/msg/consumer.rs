@@ -88,12 +88,8 @@ pub async fn event_loop() -> Result<()> {
 
 pub async fn process_payload(payload: String) {
     tokio::spawn(async move {
-        let res = agent::process(&payload).await;
-        match res {
-            Ok(_) => {}
-            Err(e) => {
-                warn!("failed to process: {:?}", e);
-            }
+        if let Err(e) = agent::process(&payload).await {
+            warn!("failed to process: {:?}", e);
         }
     });
 }

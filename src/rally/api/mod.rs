@@ -9,7 +9,7 @@ pub mod task;
 pub mod time;
 pub mod user;
 pub mod wp;
-async fn get<T:DeserializeOwned>(ut: &UserToken, url: &str) -> Result<T> {
+async fn get<T: DeserializeOwned>(ut: &UserToken, url: &str) -> Result<T> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -48,8 +48,7 @@ async fn put<'a, 'b>(ut: &'a UserToken, url: &'b str, body: String) -> Result<Ra
     get_results(resp).await
 }
 
-async fn get_results<T: DeserializeOwned>(resp: Response) -> Result<T>
-{
+async fn get_results<T: DeserializeOwned>(resp: Response) -> Result<T> {
     let status = resp.status();
     let text = resp.text().await?;
     if status.is_success() {
@@ -65,11 +64,10 @@ async fn get_results<T: DeserializeOwned>(resp: Response) -> Result<T>
         }
     } else {
         error!("fetch response from Rally meet error: {}", text);
-        Err(anyhow!(format!("Error while geting response from the Rally. Possible reason: 1. Rally server is down. 2 Your Rally API token is invalid. \r\n\r\n. Rally Response is: {}", text)))
+        Err(anyhow!(format!("Error while getting response from the Rally. Possible reason: 1. Rally server is down. 2 Your Rally API token is invalid. \r\n\r\n. Rally Response is: {}", text)))
     }
 }
 
-pub async fn fetch_object<T:DeserializeOwned>(ut: &UserToken, _ref: &str) -> Result<T> {
-    let url = _ref.to_string();
-    get::<T>(ut, &url).await
+pub async fn fetch_object<T: DeserializeOwned>(ut: &UserToken, _ref: &str) -> Result<T> {
+    get::<T>(ut, _ref).await
 }

@@ -6,6 +6,7 @@ use crate::rally::models::task::UpdateTask;
 use crate::token::tokens::UserToken;
 use anyhow::anyhow;
 use anyhow::Result;
+
 pub async fn create_task<'a, 'b>(
     ut: &UserToken,
     create_task: &'b CreateTask<'a>,
@@ -41,27 +42,25 @@ pub async fn update_task(
 }
 
 pub async fn get_tasks(ut: &UserToken, wp: &models::ObjectModel) -> Result<Vec<models::Task>> {
-    match wp {
-        models::ObjectModel::HierarchicalRequirement(models::HierarchicalRequirement {
+    let models::ObjectModel::HierarchicalRequirement(models::HierarchicalRequirement {
             Tasks,
-            ..
-        }) => {
-            if Tasks.is_some() {
-                if let models::RallyResult::QueryResult(q) =
-                    api::get(ut, &Tasks.as_ref().unwrap()._ref).await?
-                {
-                    return Ok(q
-                        .Results
-                        .iter()
-                        .filter_map(|i| match i {
-                            models::ObjectModel::Task(t) => Some(t.clone()),
-                            _ => None,
-                        })
-                        .collect::<Vec<models::Task>>());
-                }
-            }
-            Ok(vec![])
-        }
-        _ => Ok(vec![]),
+            .. }) = wp else  {
+            return Err(anyhow!("Not task!"));
+        };
+    if Tasks.is_none() {
+        return Ok(vec![]);
     }
+    let models::RallyResult::QueryResult(q) =
+                api::get(ut, &Tasks.as_ref().unwrap()._ref).await? else {
+                    return Err(anyhow!("Not task!"));
+                };
+
+    return Ok(q
+        .Results
+        .iter()
+        .filter_map(|i| match i {
+            models::ObjectModel::Task(t) => Some(t.clone()),
+            _ => None,
+        })
+        .collect::<Vec<models::Task>>());
 }

@@ -1,4 +1,3 @@
-
 use serde::{Deserialize, Serialize};
 pub mod project;
 pub use project::Project;
@@ -64,8 +63,6 @@ pub enum SingleObjectModel {
     TimeEntryItem(TimeEntryItem),
     TimeEntryValue(TimeEntryValue),
 }
-
-
 
 impl RallyResult {
     pub fn get_object(&self) -> Option<ObjectModel> {

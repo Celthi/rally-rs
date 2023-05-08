@@ -1,7 +1,4 @@
-
 use crate::rally::models;
-
-
 use chrono::prelude::*;
 
 pub struct CreateItem {
@@ -49,7 +46,7 @@ pub struct UpdateValue {
     date_val: DateTime<Utc>,
     hours: f32,
     item_ref: String,
-    pub object_id: Option<u64>
+    pub object_id: Option<u64>,
 }
 
 impl UpdateValue {
@@ -58,7 +55,7 @@ impl UpdateValue {
             date_val,
             hours,
             item_ref,
-            object_id:None
+            object_id: None,
         }
     }
     pub fn set_object_id(&mut self, oid: u64) {
@@ -70,7 +67,7 @@ impl UpdateValue {
     pub fn to_json_string(&self) -> String {
         if self.object_id.is_none() {
             format!(
-            r#"
+                r#"
             {{
                 "TimeEntryValue": {{
                     "DateVal": "{0}",
@@ -78,12 +75,12 @@ impl UpdateValue {
                     "TimeEntryItem": "{2}"
                 }}
             }}"#,
-            self.date_val.format("%Y-%m-%dT%H:%M:%S.%fZ"),
-            self.hours,
-            self.item_ref
-        )} else {
-            
-                format!(
+                self.date_val.format("%Y-%m-%dT%H:%M:%S.%fZ"),
+                self.hours,
+                self.item_ref
+            )
+        } else {
+            format!(
                 r#"
                 {{
                     "TimeEntryValue": {{
@@ -99,7 +96,5 @@ impl UpdateValue {
                 self.object_id.unwrap()
             )
         }
-
     }
 }
-

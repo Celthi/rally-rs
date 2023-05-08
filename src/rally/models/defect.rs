@@ -11,5 +11,4 @@ pub struct Defect {
     pub ObjectID: u64,
     pub ScheduleState: String,
     pub _refObjectUUID: String,
-
 }

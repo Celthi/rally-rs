@@ -8,7 +8,7 @@ pub struct TimeSpent {
     wp_formatted_id: Option<String>,
     repo_name: Option<String>,
     pr_number: Option<u64>,
-    pub task_name: Option<String>
+    pub task_name: Option<String>,
 }
 impl TimeSpent {
     pub fn get_user_name(&self) -> &str {

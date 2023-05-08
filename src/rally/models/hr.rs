@@ -12,5 +12,4 @@ pub struct HierarchicalRequirement {
     pub ScheduleState: String,
     pub Tasks: Option<EmbeddedObject>,
     pub _refObjectUUID: String,
-
 }
