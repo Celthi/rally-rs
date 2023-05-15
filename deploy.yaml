@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: tnt
-        image: tnt:2.0.5
+        image: tnt:2.0.6
         imagePullPolicy: IfNotPresent
         env:   
         - name: DB_HOST

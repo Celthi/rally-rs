@@ -42,16 +42,19 @@ pub async fn update_task(
 }
 
 pub async fn get_tasks(ut: &UserToken, wp: &models::ObjectModel) -> Result<Vec<models::Task>> {
-    let models::ObjectModel::HierarchicalRequirement(models::HierarchicalRequirement {
+    let tasks = match wp {
+        models::ObjectModel::HierarchicalRequirement(models::HierarchicalRequirement {
             Tasks,
-            .. }) = wp else  {
-            return Err(anyhow!("Not task!"));
-        };
-    if Tasks.is_none() {
+            .. }) => Tasks,
+        models::ObjectModel::Defect(models::Defect{Tasks,..}) => Tasks,
+        models::ObjectModel::TestSet(models::TestSet{Tasks, ..}) => Tasks,
+        _ => return Err(anyhow!("Not have task!"))
+    };
+    if tasks.is_none() {
         return Ok(vec![]);
     }
     let models::RallyResult::QueryResult(q) =
-                api::get(ut, &Tasks.as_ref().unwrap()._ref).await? else {
+                api::get(ut, &tasks.as_ref().unwrap()._ref).await? else {
                     return Err(anyhow!("Not task!"));
                 };
 

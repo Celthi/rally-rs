@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 pub mod project;
 pub use project::Project;
 mod defect;
-use defect::Defect;
+pub use defect::Defect;
 mod hr;
 pub use hr::HierarchicalRequirement;
 mod user;
@@ -12,7 +12,7 @@ pub use task::Task;
 pub mod time;
 pub use time::{TimeEntryItem, TimeEntryValue};
 mod testset;
-use testset::TestSet;
+pub use testset::TestSet;
 
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize)]
