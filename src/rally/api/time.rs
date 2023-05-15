@@ -23,24 +23,24 @@ pub async fn get_time_entry_items(
 ) -> Result<Vec<models::TimeEntryItem>> {
     let start_date = get_week_start_date(start_date).format("%Y-%m-%dT%H:%M:%S.%fZ");
     let url = format!(
-        r#"{0}/timeentryitem?query=(((WeekStartDate = {1}) AND (User = {2})) AND (WorkProduct.FormattedID = {3}))&fetch=true&workspace=workspace/27397600726&project=project/40120756498&projectScopeUp=false&projectScopeDown=true&pagesize=500&start=1"#,
+        r#"{0}/timeentryitem?query=(((WeekStartDate = {1}) AND (User = {2})) AND (WorkProduct.FormattedID = {3}))&fetch=true&workspace=workspace/{4}&project=project/{5}&projectScopeUp=false&projectScopeDown=true&pagesize=500&start=1"#,
         config_env::rally_url(),
         start_date,
         ut.name,
-        wp_id
+        wp_id,
+        config_env::workspace_id(),
+        config_env::root_project_id()
     );
     info!("{}", url);
     let res: models::RallyResult = api::get(ut, &url).await?;
     match res {
-        models::RallyResult::QueryResult(models::QueryResult { Results }) => {
-            return Ok(Results
-                .iter()
-                .filter_map(|i| match i {
-                    models::ObjectModel::TimeEntryItem(t) => Some(t.clone()),
-                    _ => None,
-                })
-                .collect::<Vec<models::TimeEntryItem>>());
-        }
+        models::RallyResult::QueryResult(models::QueryResult { Results }) => Ok(Results
+            .iter()
+            .filter_map(|i| match i {
+                models::ObjectModel::TimeEntryItem(t) => Some(t.clone()),
+                _ => None,
+            })
+            .collect::<Vec<models::TimeEntryItem>>()),
         _ => Err(anyhow!("No time entry item {}. \r\n", start_date)),
     }
 }
@@ -49,20 +49,19 @@ pub async fn get_time_entry_values(
     item_ref: &str,
 ) -> Result<Vec<models::TimeEntryValue>> {
     let url = format!(
-        r#"{0}/timeentryvalue?workspace={0}/workspace/27397600726&query=(TimeEntryItem = {item_ref})&fetch=true&start=1&pagesize=20"#,
-        config_env::rally_url()
+        r#"{0}/timeentryvalue?workspace={0}/workspace/{1}&query=(TimeEntryItem = {item_ref})&fetch=true&start=1&pagesize=20"#,
+        config_env::rally_url(),
+        config_env::workspace_id()
     );
     let res: models::RallyResult = api::get(ut, &url).await?;
     match res {
-        models::RallyResult::QueryResult(models::QueryResult { Results }) => {
-            return Ok(Results
-                .iter()
-                .filter_map(|i| match i {
-                    models::ObjectModel::TimeEntryValue(t) => Some(t.clone()),
-                    _ => None,
-                })
-                .collect::<Vec<models::TimeEntryValue>>());
-        }
+        models::RallyResult::QueryResult(models::QueryResult { Results }) => Ok(Results
+            .iter()
+            .filter_map(|i| match i {
+                models::ObjectModel::TimeEntryValue(t) => Some(t.clone()),
+                _ => None,
+            })
+            .collect::<Vec<models::TimeEntryValue>>()),
         _ => Err(anyhow!("No time value for item {}. \r\n", item_ref)),
     }
 }
@@ -81,7 +80,7 @@ pub async fn create_time_entry_item(
         task.clone(),
     );
     let pid = proj.get_id();
-    let url = format!("{0}/timeentryitem/create?key=None&workspace=workspace/27397600726&project={pid}&projectScopeUp=false&projectScopeDown=true", config_env::rally_url());
+    let url = format!("{0}/timeentryitem/create?key=None&workspace=workspace/{1}&project={pid}&projectScopeUp=false&projectScopeDown=true", config_env::rally_url(), config_env::workspace_id());
     let res = api::put(ut, &url, create_item.to_json_string()).await?;
     match res.get_object() {
         Some(ObjectModel::TimeEntryItem(o)) => Ok(o),
@@ -99,7 +98,7 @@ pub async fn add_time_entry_value(
 ) -> Result<models::ObjectModel> {
     let pid = proj.get_id();
 
-    let url = format!("{0}/timeentryvalue/create?key=None&workspace=workspace/27397600726&project={pid}&projectScopeUp=false&projectScopeDown=true", config_env::rally_url());
+    let url = format!("{0}/timeentryvalue/create?key=None&workspace=workspace/{1}&project={pid}&projectScopeUp=false&projectScopeDown=true", config_env::rally_url(), config_env::workspace_id());
     let res = api::put(ut, &url, update_value.to_json_string()).await?;
 
     match res.get_object() {
@@ -115,7 +114,7 @@ pub async fn update_time_entry_value(
     let pid = proj.get_id();
     let oid = update_value.object_id.unwrap();
 
-    let url = format!("{0}/timeentryvalue/{oid}?key=None&workspace=workspace/27397600726&project={pid}&projectScopeUp=false&projectScopeDown=true", config_env::rally_url());
+    let url = format!("{0}/timeentryvalue/{oid}?key=None&workspace=workspace/{1}&project={pid}&projectScopeUp=false&projectScopeDown=true", config_env::rally_url(), config_env::workspace_id());
     let res = api::post(ut, &url, update_value.to_json_string()).await?;
 
     match res.get_object() {

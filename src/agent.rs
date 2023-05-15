@@ -5,13 +5,14 @@ use crate::rally::op::ts;
 use crate::token::tokens;
 use anyhow::bail;
 use anyhow::Result;
-use tracing::error;
+use tracing::{error, info};
 
 pub async fn process(payload: &str) -> Result<()> {
     let tp: TimeSpent = serde_json::from_str(payload)?;
     if let Err(e) = handle_time_spent(&tp).await {
         error!("processing time spent meet error: {:?}", e);
         if let (Some(repo), Some(pr)) = (tp.get_repo_name(), tp.get_pr_number()) {
+            info!("add to github comment.");
             github::post_issue_comment(
                 repo,
                 pr,

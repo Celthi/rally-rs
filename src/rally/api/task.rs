@@ -11,7 +11,7 @@ pub async fn create_task<'a, 'b>(
     ut: &UserToken,
     create_task: &'b CreateTask<'a>,
 ) -> Result<models::Task> {
-    let url = format!("{}/task/create?key=None&workspace=workspace/27397600726&project=project/40120756498&projectScopeUp=false&projectScopeDown=true", config_env::rally_url());
+    let url = format!("{0}/task/create?key=None&workspace=workspace/{1}&project=project/{2}&projectScopeUp=false&projectScopeDown=true", config_env::rally_url(), config_env::workspace_id(), config_env::root_project_id() );
     let res = api::post(ut, &url, create_task.to_json_string()).await?;
     match res.get_object() {
         Some(models::ObjectModel::Task(t)) => Ok(t),
@@ -28,7 +28,7 @@ pub async fn update_task(
     todo: f32,
 ) -> Result<models::ObjectModel> {
     let oid = task.ObjectID;
-    let url = format!("{0}/task/{oid}?key=None&workspace=workspace/27397600726&project=project/40120756498&projectScopeUp=false&projectScopeDown=true", config_env::rally_url());
+    let url = format!("{0}/task/{oid}?key=None&workspace=workspace/{1}&project=project/{2}&projectScopeUp=false&projectScopeDown=true", config_env::rally_url(), config_env::workspace_id(), config_env::root_project_id());
     let mut state = "In-Progress".to_string();
     if todo <= 0f32 {
         state = "Completed".to_string();

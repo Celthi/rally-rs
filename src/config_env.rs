@@ -16,6 +16,8 @@ pub struct ConfigEnv {
     pub github_url: String,
     pub doc_link: String,
     pub rally_url: String,
+    pub workspace_id: String,
+    pub root_project_id: String,
 }
 
 impl ConfigEnv {
@@ -76,15 +78,19 @@ impl ConfigEnv {
             ));
         }
         let github_url =
-            env::var("GITHUB_URL").unwrap_or_else(|_| "http://github.com/".to_string());
+            env::var("GITHUB_URL").unwrap_or_else(|_| "https://api.github.com/".to_string());
         let doc_link =
-            env::var("TNT_DOC_LINK").unwrap_or_else(|_| "http://github.com/".to_string());
+            env::var("TNT_DOC_LINK").unwrap_or_else(|_| "https://api.github.com/".to_string());
         let rally_url = env::var("RALLY_URL");
         if rally_url.is_err() {
             return Err(anyhow!(
                 "RALLY_URL is required, please provide it by env variable RALLY_URL"
             ));
         }
+        let workspace_id =
+            env::var("RALLY_WORKSPACE_ID").unwrap_or_else(|_| "27397600726".to_string());
+        let root_project_id =
+            env::var("RALLY_ROOT_PROJECT_ID").unwrap_or_else(|_| "40120756498".to_string());
         Ok(ConfigEnv {
             db_host: db_host.unwrap(),
             db_port,
@@ -98,6 +104,8 @@ impl ConfigEnv {
             github_url,
             doc_link,
             rally_url: rally_url.unwrap(),
+            workspace_id,
+            root_project_id,
         })
     }
 }
@@ -163,6 +171,17 @@ pub fn doc_link() -> &'static str {
 
 pub fn rally_url() -> &'static str {
     &CONFIG.get().expect("fail to get env variable").rally_url
+}
+
+pub fn workspace_id() -> &'static str {
+    &CONFIG.get().expect("fail to get env variable").workspace_id
+}
+
+pub fn root_project_id() -> &'static str {
+    &CONFIG
+        .get()
+        .expect("fail to get env variable")
+        .root_project_id
 }
 
 pub fn ensure_config() {

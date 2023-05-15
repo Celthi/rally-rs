@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: tnt
-        image: tnt:1.0
+        image: tnt:2.0.5
         imagePullPolicy: IfNotPresent
         env:   
         - name: DB_HOST
@@ -64,4 +64,8 @@ spec:
             configMapKeyRef:
               name: tnt-config
               key: tnt_encrypt_key
-
+        - name: GITHUB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: tnt-config
+              key: github_api_url

@@ -10,7 +10,7 @@ use crate::token::tokens::UserToken;
 use anyhow::{bail, Result};
 use chrono::prelude::*;
 
-use tracing::info;
+use tracing::{error, info};
 
 fn get_task_name(date: &DateTime<Utc>) -> String {
     let s = "Code review ".to_string();
@@ -104,20 +104,20 @@ async fn get_task_and_time_entry_item(
         }
     }
 
-    let task = select_or_create_task(ut, work_product, tp).await?;
-    if task.is_some() {
+    if let Some(task) = select_or_create_task(ut, work_product, tp).await? {
         let item = Some(
             api::time::create_time_entry_item(
                 ut,
                 &work_product.get_project(),
                 work_product,
                 &task_date,
-                task.as_ref().unwrap(),
+                &task,
             )
             .await?,
         );
-        return Ok((task, item));
+        return Ok((Some(task), item));
     }
+    error!("cannot find task end item for {}", wp_id);
     Ok((None, None))
 }
 

@@ -5,16 +5,23 @@ use anyhow::{anyhow, Result};
 
 // work product: US, DE, TS, etc.
 pub async fn get_wp(ut: &UserToken, formatted_id: &str) -> Result<ObjectModel> {
-    let url;
-    if formatted_id.starts_with("DE") {
-        url = format!("{0}/Defect?fetch=true&query=(FormattedID%20%3D%20%22{formatted_id}%22)&workspace=workspace/27397600726&project=project/40120756498&projectScopeUp=false&projectScopeDown=true&pagesize=500&start=1", config_env::rally_url());
+    let query_part = format!("fetch=true&query=(FormattedID%20%3D%20%22{formatted_id}%22)&workspace=workspace/{0}&project=project/{1}&projectScopeUp=false&projectScopeDown=true&pagesize=500&start=1", 
+    config_env::workspace_id(),
+    config_env::root_project_id()
+);
+    let url = if formatted_id.starts_with("DE") {
+        format!("{0}/Defect?{1}", config_env::rally_url(), query_part)
     } else if formatted_id.starts_with("US") {
-        url = format!("{0}/HierarchicalRequirement?fetch=true&query=(FormattedID%20%3D%20%22{formatted_id}%22)&workspace=workspace/27397600726&project=project/40120756498&projectScopeUp=false&projectScopeDown=true&pagesize=500&start=1", config_env::rally_url());
+        format!(
+            "{0}/HierarchicalRequirement?{1}",
+            config_env::rally_url(),
+            query_part
+        )
     } else if formatted_id.starts_with("TS") {
-        url = format!("{0}/TestSet?fetch=true&query=(FormattedID%20%3D%20%22{formatted_id}%22)&workspace=workspace/27397600726&project=project/40120756498&projectScopeUp=false&projectScopeDown=true&pagesize=500&start=1", config_env::rally_url());
+        format!("{0}/TestSet?{1}", config_env::rally_url(), query_part)
     } else {
-        url = "".to_string();
-    }
+        "".to_string()
+    };
 
     let res = super::get::<RallyResult>(ut, &url).await?;
     let obj = res.get_object();
