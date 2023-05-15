@@ -130,8 +130,9 @@ async fn select_or_create_task(
     let owner = fetch_rally_user(ut, &ut.name).await?;
     for t in tasks {
         if t.State != "Completed"
-            && t.Owner._refObjectUUID.is_some()
-            && t.Owner._refObjectUUID.as_deref().unwrap() == owner.get_ref_object_uuid()
+            &&t.Owner.is_some()
+            && t.Owner.as_ref().unwrap()._refObjectUUID.is_some()
+            && t.Owner.as_ref().unwrap()._refObjectUUID.as_deref().unwrap() == owner.get_ref_object_uuid()
         {
             return Ok(Some(t));
         }

@@ -14,7 +14,7 @@ pub struct Task {
     pub ToDo: f32,
     pub _ref: String,
     pub ObjectID: u64,
-    pub Owner: EmbeddedObject,
+    pub Owner: Option<EmbeddedObject>,
     pub _refObjectUUID: String,
 }
 
