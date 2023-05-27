@@ -11,7 +11,7 @@ pub struct Task {
     pub Estimate: Option<f32>,
     pub State: String,
     pub TimeSpent: f32,
-    pub ToDo: f32,
+    pub ToDo: Option<f32>,
     pub _ref: String,
     pub ObjectID: u64,
     pub Owner: Option<EmbeddedObject>,

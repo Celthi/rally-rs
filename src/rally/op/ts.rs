@@ -41,7 +41,7 @@ async fn add_time_sheet(ut: &UserToken, wp_id: &str, tp: &TimeSpent) -> Result<(
         let task = task.unwrap();
         let item = item.unwrap();
         add_time_entry_value(&item, ut, task_date, tp, work_product).await?;
-        let todo = task.ToDo - tp.get_time_spent();
+        let todo = task.ToDo.map(|t| t- tp.get_time_spent()).unwrap_or(0.0);
         update_task(ut, &task, todo).await?;
     } else {
         info!("No task and time item for {wp_id}");
