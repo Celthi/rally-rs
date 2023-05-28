@@ -32,6 +32,7 @@ impl DB {
 
         Ok(DB { client })
     }
+
     // will update the location if insert the debug id again
     pub async fn insert_rally_token(&mut self, user_name: &str, token: &str) -> Result<()> {
         self.client.execute(

@@ -23,40 +23,39 @@ pub async fn select_or_create_task(
 ) -> Result<Option<Task>> {
     let tasks = api::task::get_tasks(ut, work_product).await?;
     let owners = fetch_rally_user(ut, &ut.name).await?;
-    for owner in owners.iter() {
-        let t = select_task_for_owner(tasks, owner);
-        if t.is_some() {
-            return Ok(t);
-        }
-
-        let task_date: DateTime<Utc> = Utc::now();
-        let task_name = tp
-            .task_name
-            .clone()
-            .unwrap_or_else(|| get_task_name(&task_date));
-        let ct = CreateTask::new(
-            task_name,
-            owner._ref.clone(),
-            tp.get_time_spent(),
-            work_product,
-        );
-        return Ok(Some(create_task(ut, &ct).await?));
+    let owner = owners.first().ok_or(anyhow::anyhow!("No owner found"))?;
+    let t = select_task_for_owner(&tasks, owner);
+    if t.is_some() {
+        return Ok(t.cloned());
     }
-    Ok(None)
+
+    // if we get here, then we need to create a new task
+    let task_date: DateTime<Utc> = Utc::now();
+    let task_name = tp
+        .task_name
+        .clone()
+        .unwrap_or_else(|| get_task_name(&task_date));
+    let ct = CreateTask::new(
+        task_name,
+        owner._ref.clone(),
+        tp.get_time_spent(),
+        work_product,
+    );
+    Ok(Some(create_task(ut, &ct).await?))
 }
 
-pub fn select_task_for_owner(tasks: Vec<Task>, owner: &User) -> Option<Task> {
-    for t in tasks {
-        if t.State != "Completed"
-            && t.Owner
-                .as_ref()
-                .map(|o| o._refObjectUUID.as_deref())
-                .flatten()
-                .map(|o| o == owner._refObjectUUID)
-                .unwrap_or(false)
-        {
-            return Some(t);
-        }
-    }
-    None
+pub fn select_task_for_owner<'a>(tasks: &'a Vec<Task>, owner: &User) -> Option<&'a Task> {
+    tasks.iter().find(|t| {
+        let is_owned = owned_by_user(t, owner);
+        t.State != "Completed" && is_owned
+    })
+}
+
+fn owned_by_user(t: &Task, owner: &User) -> bool {
+    t.Owner
+        .as_ref()
+        .map(|o| o._refObjectUUID.as_deref())
+        .flatten()
+        .map(|uuid| uuid == owner._refObjectUUID)
+        .unwrap_or(false)
 }
