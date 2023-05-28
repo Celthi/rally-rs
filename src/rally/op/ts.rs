@@ -1,11 +1,11 @@
 use crate::msg::message::TimeSpent;
+use crate::rally::api;
 use crate::rally::api::task::{create_task, update_task};
 use crate::rally::api::user::fetch_rally_user;
 use crate::rally::api::wp::get_wp;
-use crate::rally::models;
 use crate::rally::models::task::CreateTask;
 use crate::rally::models::time::UpdateValue;
-use crate::rally::{api, models::SingleObjectModel};
+use crate::rally::models::{ObjectModel, SingleObjectModel, Task, TimeEntryItem, User};
 use crate::token::tokens::UserToken;
 use anyhow::{bail, Result};
 use chrono::prelude::*;
@@ -41,7 +41,7 @@ async fn add_time_sheet(ut: &UserToken, wp_id: &str, tp: &TimeSpent) -> Result<(
         let task = task.unwrap();
         let item = item.unwrap();
         add_time_entry_value(&item, ut, task_date, tp, work_product).await?;
-        let todo = task.ToDo.map(|t| t- tp.get_time_spent()).unwrap_or(0.0);
+        let todo = task.ToDo.map(|t| t - tp.get_time_spent()).unwrap_or(0.0);
         update_task(ut, &task, todo).await?;
     } else {
         info!("No task and time item for {wp_id}");
@@ -50,11 +50,11 @@ async fn add_time_sheet(ut: &UserToken, wp_id: &str, tp: &TimeSpent) -> Result<(
 }
 
 async fn add_time_entry_value(
-    item: &models::TimeEntryItem,
+    item: &TimeEntryItem,
     ut: &UserToken,
     task_date: DateTime<Utc>,
     tp: &TimeSpent,
-    work_product: models::ObjectModel,
+    work_product: ObjectModel,
 ) -> Result<(), anyhow::Error> {
     let update_value = create_update_value(item, ut, task_date, tp).await?;
     if update_value.object_id.is_none() {
@@ -66,7 +66,7 @@ async fn add_time_entry_value(
 }
 
 async fn create_update_value(
-    item: &models::TimeEntryItem,
+    item: &TimeEntryItem,
     ut: &UserToken,
     task_date: DateTime<Utc>,
     tp: &TimeSpent,
@@ -85,25 +85,34 @@ async fn create_update_value(
     Ok(update_value)
 }
 
-async fn get_task_and_time_entry_item(
+async fn get_uncompleted_task_and_entry_item(
     ut: &UserToken,
-    task_date: DateTime<Utc>,
-    wp_id: &str,
-    work_product: &models::ObjectModel,
-    tp: &TimeSpent,
-) -> Result<(Option<models::Task>, Option<models::TimeEntryItem>)> {
-    let tis = api::time::get_time_entry_items(ut, &task_date, wp_id).await?;
-
+    tis: Vec<TimeEntryItem>,
+) -> Result<Option<(Task, TimeEntryItem)>> {
     for i in tis {
         if let SingleObjectModel::Task(t) =
             api::fetch_object::<SingleObjectModel>(ut, &i.Task._ref).await?
         {
             if t.State != "Completed" {
-                return Ok((Some(t), Some(i)));
+                return Ok(Some((t, i)));
             }
         }
     }
+    Ok(None)
+}
 
+async fn get_task_and_time_entry_item(
+    ut: &UserToken,
+    task_date: DateTime<Utc>,
+    wp_id: &str,
+    work_product: &ObjectModel,
+    tp: &TimeSpent,
+) -> Result<(Option<Task>, Option<TimeEntryItem>)> {
+    let tis = api::time::get_time_entry_items(ut, &task_date, wp_id).await?;
+    let uncompleted_task_and_entry_item = get_uncompleted_task_and_entry_item(ut, tis).await?;
+    if let Some((task, item)) = uncompleted_task_and_entry_item {
+        return Ok((Some(task), Some(item)));
+    }
     if let Some(task) = select_or_create_task(ut, work_product, tp).await? {
         let item = Some(
             api::time::create_time_entry_item(
@@ -123,31 +132,45 @@ async fn get_task_and_time_entry_item(
 
 async fn select_or_create_task(
     ut: &UserToken,
-    work_product: &models::ObjectModel,
+    work_product: &ObjectModel,
     tp: &TimeSpent,
-) -> Result<Option<models::Task>> {
+) -> Result<Option<Task>> {
     let tasks = api::task::get_tasks(ut, work_product).await?;
-    let owner = fetch_rally_user(ut, &ut.name).await?;
+    let owners = fetch_rally_user(ut, &ut.name).await?;
+    for owner in owners.iter() {
+        let t = select_task_for_owner(tasks, owner);
+        if t.is_some() {
+            return Ok(t);
+        }
+
+        let task_date: DateTime<Utc> = Utc::now();
+        let task_name = tp
+            .task_name
+            .clone()
+            .unwrap_or_else(|| get_task_name(&task_date));
+        let ct = CreateTask::new(
+            task_name,
+            owner._ref.clone(),
+            tp.get_time_spent(),
+            work_product,
+        );
+        return Ok(Some(create_task(ut, &ct).await?));
+    }
+    Ok(None)
+}
+
+fn select_task_for_owner(tasks: Vec<Task>, owner: &User) -> Option<Task> {
     for t in tasks {
         if t.State != "Completed"
-            &&t.Owner.is_some()
-            && t.Owner.as_ref().unwrap()._refObjectUUID.is_some()
-            && t.Owner.as_ref().unwrap()._refObjectUUID.as_deref().unwrap() == owner.get_ref_object_uuid()
+            && t.Owner
+                .as_ref()
+                .map(|o| o._refObjectUUID.as_deref())
+                .flatten()
+                .map(|o| o == owner._refObjectUUID)
+                .unwrap_or(false)
         {
-            return Ok(Some(t));
+            return Some(t);
         }
     }
-
-    let task_date: DateTime<Utc> = Utc::now();
-    let task_name = tp
-        .task_name
-        .clone()
-        .unwrap_or_else(|| get_task_name(&task_date));
-    let ct = CreateTask::new(
-        task_name,
-        owner.get_ref().to_string(),
-        tp.get_time_spent(),
-        work_product,
-    );
-    Ok(Some(create_task(ut, &ct).await?))
+    None
 }

@@ -6,7 +6,7 @@ pub use defect::Defect;
 mod hr;
 pub use hr::HierarchicalRequirement;
 mod user;
-use user::User;
+pub use user::User;
 pub mod task;
 pub use task::Task;
 pub mod time;
@@ -42,7 +42,7 @@ pub struct OperationResult {
 
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize, Debug, Clone)]
-#[serde(tag = "_type")]
+#[serde(tag = "_type")] // this is the differentiator with SingleObjectModel
 pub enum ObjectModel {
     User(User),
     HierarchicalRequirement(HierarchicalRequirement),
@@ -52,6 +52,7 @@ pub enum ObjectModel {
     TimeEntryItem(TimeEntryItem),
     TimeEntryValue(TimeEntryValue),
 }
+
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub enum SingleObjectModel {
@@ -62,6 +63,15 @@ pub enum SingleObjectModel {
     TestSet(TestSet),
     TimeEntryItem(TimeEntryItem),
     TimeEntryValue(TimeEntryValue),
+}
+
+#[allow(non_snake_case)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct EmbeddedObject {
+    pub _ref: String,
+    pub _refObjectUUID: Option<String>,
+    pub _refObjectName: Option<String>,
+    pub _type: Option<String>,
 }
 
 impl RallyResult {
@@ -79,6 +89,7 @@ impl RallyResult {
         }
     }
 }
+
 impl ObjectModel {
     pub fn get_ref(&self) -> &str {
         match self {
@@ -91,6 +102,7 @@ impl ObjectModel {
             ObjectModel::TimeEntryValue(t) => &t._ref,
         }
     }
+
     pub fn get_project(&self) -> Project {
         match self {
             ObjectModel::User(u) => {
@@ -110,6 +122,7 @@ impl ObjectModel {
             ObjectModel::TimeEntryValue(TimeEntryValue { .. }) => Project::default(),
         }
     }
+
     pub fn get_object_id(&self) -> u64 {
         match self {
             ObjectModel::User(User { ObjectID, .. }) => *ObjectID,
@@ -123,6 +136,7 @@ impl ObjectModel {
             ObjectModel::TimeEntryValue(TimeEntryValue { ObjectID, .. }) => *ObjectID,
         }
     }
+
     pub fn get_ref_object_uuid(&self) -> &str {
         match self {
             ObjectModel::User(User { _refObjectUUID, .. }) => _refObjectUUID,
@@ -137,6 +151,7 @@ impl ObjectModel {
             ObjectModel::TimeEntryValue(TimeEntryValue { _refObjectUUID, .. }) => _refObjectUUID,
         }
     }
+
     pub fn get_formatted_id(&self) -> String {
         match self {
             ObjectModel::Defect(Defect { FormattedID, .. }) => FormattedID.to_owned(),
@@ -148,6 +163,7 @@ impl ObjectModel {
             _ => "no id".to_string(),
         }
     }
+
     pub fn get_schedule_state(&self) -> &str {
         match self {
             ObjectModel::Defect(Defect { ScheduleState, .. }) => ScheduleState,
@@ -158,12 +174,4 @@ impl ObjectModel {
             _ => "Undefined",
         }
     }
-}
-#[allow(non_snake_case)]
-#[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct EmbeddedObject {
-    pub _ref: String,
-    pub _refObjectUUID: Option<String>,
-    pub _refObjectName: Option<String>,
-    pub _type: Option<String>,
 }

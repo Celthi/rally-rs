@@ -16,6 +16,7 @@ pub fn get_week_start_date(date: &DateTime<Utc>) -> DateTime<Utc> {
         .unwrap()
         - Duration::days((date.weekday().number_from_monday() as i64) % 7)
 }
+
 pub async fn get_time_entry_items(
     ut: &UserToken,
     start_date: &DateTime<Utc>,
@@ -44,6 +45,7 @@ pub async fn get_time_entry_items(
         _ => Err(anyhow!("No time entry item {}. \r\n", start_date)),
     }
 }
+
 pub async fn get_time_entry_values(
     ut: &UserToken,
     item_ref: &str,
@@ -106,6 +108,7 @@ pub async fn add_time_entry_value(
         None => Err(anyhow!("Cannot add time spent for user {}", ut.name)),
     }
 }
+
 pub async fn update_time_entry_value(
     ut: &UserToken,
     proj: &models::Project,

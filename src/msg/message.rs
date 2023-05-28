@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+
 #[derive(Deserialize, Serialize, Default, Clone)]
 pub struct TimeSpent {
     user: String,
@@ -10,6 +11,7 @@ pub struct TimeSpent {
     pr_number: Option<u64>,
     pub task_name: Option<String>,
 }
+
 impl TimeSpent {
     pub fn get_user_name(&self) -> &str {
         &self.user

@@ -1,4 +1,5 @@
 use super::*;
+use crate::rally::models;
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -12,6 +13,7 @@ pub struct TimeEntryItem {
     pub _refObjectUUID: String,
     pub Task: EmbeddedObject,
 }
+
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct TimeEntryValue {
@@ -22,8 +24,6 @@ pub struct TimeEntryValue {
     pub DateVal: DateTime<Utc>,
     pub Hours: f32,
 }
-
-use crate::rally::models;
 
 pub struct CreateItem {
     project: models::Project,

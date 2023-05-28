@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Project {
@@ -18,7 +19,7 @@ impl Default for Project {
         Project {
             _ref: "{0}/project/27956542317".to_string(),
             _refObjectName: "Tec".to_string(),
-            _refObjectUUID: "hi".to_string(),
+            _refObjectUUID: "27956542317".to_string(),
         }
     }
 }

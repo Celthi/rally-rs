@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub struct PostComment<'a> {
     body: &'a str,
 }
+
 pub async fn post_issue_comment(repo_name: &str, pr_number: u64, s: &str) -> Result<()> {
     post_issue_comment_internal(
         config_env::github_url(),
