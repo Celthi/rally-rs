@@ -45,10 +45,11 @@ pub async fn get_tasks(ut: &UserToken, wp: &models::ObjectModel) -> Result<Vec<m
     let tasks = match wp {
         models::ObjectModel::HierarchicalRequirement(models::HierarchicalRequirement {
             Tasks,
-            .. }) => Tasks,
-        models::ObjectModel::Defect(models::Defect{Tasks,..}) => Tasks,
-        models::ObjectModel::TestSet(models::TestSet{Tasks, ..}) => Tasks,
-        _ => return Err(anyhow!("Not have task!"))
+            ..
+        }) => Tasks,
+        models::ObjectModel::Defect(models::Defect { Tasks, .. }) => Tasks,
+        models::ObjectModel::TestSet(models::TestSet { Tasks, .. }) => Tasks,
+        _ => return Err(anyhow!("Not have task!")),
     };
     if tasks.is_none() {
         return Ok(vec![]);

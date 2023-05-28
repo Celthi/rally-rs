@@ -15,15 +15,17 @@ pub async fn fetch_rally_user(ut: &UserToken, name: &str) -> Result<Vec<User>> {
     match res {
         RallyResult::QueryResult(qr) => {
             let results = qr.Results;
-            Ok(results.into_iter().filter_map(|i| match i {
-                ObjectModel::User(u) => Some(u),
-                _ => None,
-            }).collect::<Vec<User>>())
+            Ok(results
+                .into_iter()
+                .filter_map(|i| match i {
+                    ObjectModel::User(u) => Some(u),
+                    _ => None,
+                })
+                .collect::<Vec<User>>())
         }
         _ => Err(anyhow!(format!(
             "No Rally user for {} or the Rally token is invalid.\r\n",
             name
         ))),
     }
-
 }
