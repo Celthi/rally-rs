@@ -52,8 +52,44 @@ pub async fn update_wp(ut: &UserToken, wp: &ObjectModel, body: String) -> Result
 
 pub async fn set_wp_to_ready(ut: &UserToken, wp: &ObjectModel) -> Result<ObjectModel> {
     let body = format!(
-        r#"{{"FormattedID": "{0}", "Ready": true}}"#,
-        wp.get_formatted_id()
+        r#"{{"defect": {{ "ObjectID": "{0}", "Ready": true}}
+    }}"#,
+        wp.get_object_id()
     );
     update_wp(ut, wp, body).await
+}
+
+#[cfg(test)]
+mod test {
+    use crate::config_env;
+
+    #[test]
+    fn test_set_ready() {
+        let body = r#"{"FormattedID": "US1234", "Ready": true}"#;
+        assert_eq!(body, r#"{"FormattedID": "US1234", "Ready": true}"#);
+        // read token from env var RALLY_TOKEN
+        let token = std::env::var("RALLY_TOKEN");
+        let name = std::env::var("RALLY_USER");
+
+        if token.is_err() {
+            println!("Please set RALLY_TOKEN env var first.");
+            return;
+        }
+
+        // create tokio runtime
+        config_env::ensure_config();
+
+        let rt = tokio::runtime::Runtime::new().unwrap();
+
+        let ut = crate::token::tokens::UserToken {
+            name: name.unwrap(),
+            token: token.unwrap(),
+        };
+        // test set wp to ready
+        let wp = rt.block_on(super::get_wp(&ut, "DE274452"));
+        assert!(wp.is_ok());
+        let wp = rt.block_on(super::set_wp_to_ready(&ut, &wp.unwrap()));
+        assert!(wp.is_ok());
+        
+    }
 }

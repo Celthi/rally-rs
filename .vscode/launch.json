@@ -23,6 +23,7 @@
             "envFile": "${workspaceFolder}/.env",
             "args": [],
             "cwd": "${workspaceFolder}"
+            
         },
         {
             "type": "lldb",
