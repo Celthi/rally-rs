@@ -76,10 +76,10 @@ pub async fn create_time_entry_item(
     task: &models::Task,
 ) -> Result<models::TimeEntryItem> {
     let create_item: CreateItem = CreateItem::new(
-        &proj,
+        proj,
         api::time::get_week_start_date(date),
-        &work_project,
-        &task,
+        work_project,
+        task,
     );
     let pid = proj.get_id();
     let url = format!("{0}/timeentryitem/create?key=None&workspace=workspace/{1}&project={pid}&projectScopeUp=false&projectScopeDown=true", config_env::rally_url(), config_env::workspace_id());

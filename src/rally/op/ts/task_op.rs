@@ -44,7 +44,7 @@ pub async fn select_or_create_task(
     Ok(Some(create_task(ut, &ct).await?))
 }
 
-pub fn select_task_for_owner<'a>(tasks: &'a Vec<Task>, owner: &User) -> Option<&'a Task> {
+pub fn select_task_for_owner<'a>(tasks: &'a [Task], owner: &User) -> Option<&'a Task> {
     tasks.iter().find(|t| {
         let is_owned = owned_by_user(t, owner);
         t.State != "Completed" && is_owned
@@ -54,8 +54,7 @@ pub fn select_task_for_owner<'a>(tasks: &'a Vec<Task>, owner: &User) -> Option<&
 fn owned_by_user(t: &Task, owner: &User) -> bool {
     t.Owner
         .as_ref()
-        .map(|o| o._refObjectUUID.as_deref())
-        .flatten()
+        .and_then(|o| o._refObjectUUID.as_deref())
         .map(|uuid| uuid == owner._refObjectUUID)
         .unwrap_or(false)
 }
