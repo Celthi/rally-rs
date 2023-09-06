@@ -46,14 +46,18 @@ pub async fn update_wp(ut: &UserToken, wp: &ObjectModel, body: String) -> Result
     if obj.is_some() {
         Ok(obj.unwrap())
     } else {
-        Err(anyhow!("No US, DE, TS found for {}. \r\n", wp.get_object_id()))
+        Err(anyhow!(
+            "No US, DE, TS found for {}. \r\n",
+            wp.get_object_id()
+        ))
     }
 }
 
 pub async fn set_wp_to_ready(ut: &UserToken, wp: &ObjectModel) -> Result<ObjectModel> {
     let body = format!(
-        r#"{{"defect": {{ "ObjectID": "{0}", "Ready": true}}
+        r#"{{"{0}": {{ "ObjectID": "{1}", "Ready": true}}
     }}"#,
+        wp.get_type(),
         wp.get_object_id()
     );
     update_wp(ut, wp, body).await
@@ -90,6 +94,5 @@ mod test {
         assert!(wp.is_ok());
         let wp = rt.block_on(super::set_wp_to_ready(&ut, &wp.unwrap()));
         assert!(wp.is_ok());
-        
     }
 }

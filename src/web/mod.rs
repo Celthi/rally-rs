@@ -2,7 +2,8 @@ use crate::{config_env, token::db};
 use anyhow::Result;
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 use poem::{
-    listener::TcpListener, middleware::Tracing, handler, post, web::Json, EndpointExt, Route, Server,
+    handler, listener::TcpListener, middleware::Tracing, post, web::Json, EndpointExt, Route,
+    Server,
 };
 use serde::Deserialize;
 use tracing::error;
