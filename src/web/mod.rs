@@ -2,8 +2,7 @@ use crate::{config_env, token::db};
 use anyhow::Result;
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 use poem::{
-    handler, listener::TcpListener, middleware::Tracing, post, web::Json, EndpointExt, Route,
-    Server,
+    listener::TcpListener, middleware::Tracing, handler, post, web::Json, EndpointExt, Route, Server,
 };
 use serde::Deserialize;
 use tracing::error;
@@ -26,7 +25,7 @@ pub struct RallyTokenUpdate {
     user_name: String,
     token: String,
 }
-#[handler(method = "post")]
+#[handler]
 async fn save_rally_token(req: Json<RallyTokenUpdate>) {
     match insert_to_db(&req).await {
         Ok(()) => {}
