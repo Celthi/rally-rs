@@ -25,19 +25,19 @@ pub struct TimeEntryValue {
     pub Hours: f32,
 }
 
-pub struct CreateItem {
-    project: models::Project,
+pub struct CreateItem<'a, 'b, 'c> {
+    project: &'a models::Project,
     week_start_date: DateTime<Utc>,
-    work_product: models::ObjectModel,
-    task: models::Task,
+    work_product: &'b models::ObjectModel,
+    task: &'c models::Task,
 }
 
-impl CreateItem {
+impl<'a, 'b, 'c> CreateItem<'a, 'b, 'c> {
     pub fn new(
-        project: models::Project,
+        project: &'a models::Project,
         week_start_date: DateTime<Utc>,
-        work_product: models::ObjectModel,
-        task: models::Task,
+        work_product: &'b models::ObjectModel,
+        task: &'c models::Task,
     ) -> Self {
         CreateItem {
             project,
@@ -66,15 +66,15 @@ impl CreateItem {
     }
 }
 
-pub struct UpdateValue {
+pub struct UpdateValue<'a> {
     date_val: DateTime<Utc>,
     hours: f32,
-    item_ref: String,
+    item_ref: &'a str,
     pub object_id: Option<u64>,
 }
 
-impl UpdateValue {
-    pub fn new(date_val: DateTime<Utc>, hours: f32, item_ref: String) -> Self {
+impl<'a> UpdateValue<'a> {
+    pub fn new(date_val: DateTime<Utc>, hours: f32, item_ref: &'a str) -> Self {
         UpdateValue {
             date_val,
             hours,

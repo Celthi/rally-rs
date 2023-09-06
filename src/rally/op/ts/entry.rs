@@ -17,7 +17,7 @@ pub async fn add_time_entry_value(
     ut: &UserToken,
     task_date: DateTime<Utc>,
     tp: &TimeSpent,
-    work_product: ObjectModel,
+    work_product: &ObjectModel,
 ) -> Result<(), anyhow::Error> {
     let update_value = create_update_value(item, ut, task_date, tp).await?;
     if update_value.object_id.is_none() {
@@ -28,14 +28,14 @@ pub async fn add_time_entry_value(
     Ok(())
 }
 
-pub async fn create_update_value(
-    item: &TimeEntryItem,
+pub async fn create_update_value<'a>(
+    item: &'a TimeEntryItem,
     ut: &UserToken,
     task_date: DateTime<Utc>,
     tp: &TimeSpent,
-) -> Result<UpdateValue, anyhow::Error> {
+) -> Result<UpdateValue<'a>, anyhow::Error> {
     let values = api::time::get_time_entry_values(ut, &item._ref).await?;
-    let mut update_value = UpdateValue::new(task_date, tp.get_time_spent(), item._ref.clone());
+    let mut update_value = UpdateValue::new(task_date, tp.get_time_spent(), &item._ref);
     values.iter().for_each(|i| {
         if i.DateVal.year() == task_date.year()
             && i.DateVal.month() == task_date.month()

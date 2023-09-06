@@ -31,3 +31,29 @@ pub async fn get_wp(ut: &UserToken, formatted_id: &str) -> Result<ObjectModel> {
         Err(anyhow!("No US, DE, TS found for {}. \r\n", formatted_id))
     }
 }
+
+pub async fn update_wp(ut: &UserToken, wp: &ObjectModel, body: String) -> Result<ObjectModel> {
+    let url = format!(
+        "{0}/{1}/{2}?key=None&workspace=workspace/{3}&project=project/{4}&projectScopeUp=false&projectScopeDown=true",
+        config_env::rally_url(),
+        wp.get_type(),
+        wp.get_object_id(),
+        config_env::workspace_id(),
+        config_env::root_project_id()
+    );
+    let res = super::post(ut, &url, body).await?;
+    let obj = res.get_object();
+    if obj.is_some() {
+        Ok(obj.unwrap())
+    } else {
+        Err(anyhow!("No US, DE, TS found for {}. \r\n", wp.get_object_id()))
+    }
+}
+
+pub async fn set_wp_to_ready(ut: &UserToken, wp: &ObjectModel) -> Result<ObjectModel> {
+    let body = format!(
+        r#"{{"FormattedID": "{0}", "Ready": true}}"#,
+        wp.get_formatted_id()
+    );
+    update_wp(ut, wp, body).await
+}

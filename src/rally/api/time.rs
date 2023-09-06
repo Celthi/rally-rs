@@ -76,10 +76,10 @@ pub async fn create_time_entry_item(
     task: &models::Task,
 ) -> Result<models::TimeEntryItem> {
     let create_item: CreateItem = CreateItem::new(
-        proj.clone(),
+        &proj,
         api::time::get_week_start_date(date),
-        work_project.clone(),
-        task.clone(),
+        &work_project,
+        &task,
     );
     let pid = proj.get_id();
     let url = format!("{0}/timeentryitem/create?key=None&workspace=workspace/{1}&project={pid}&projectScopeUp=false&projectScopeDown=true", config_env::rally_url(), config_env::workspace_id());
@@ -96,7 +96,7 @@ pub async fn create_time_entry_item(
 pub async fn add_time_entry_value(
     ut: &UserToken,
     proj: &models::Project,
-    update_value: &UpdateValue,
+    update_value: &UpdateValue<'_>,
 ) -> Result<models::ObjectModel> {
     let pid = proj.get_id();
 
@@ -112,7 +112,7 @@ pub async fn add_time_entry_value(
 pub async fn update_time_entry_value(
     ut: &UserToken,
     proj: &models::Project,
-    update_value: &UpdateValue,
+    update_value: &UpdateValue<'_>,
 ) -> Result<models::ObjectModel> {
     let pid = proj.get_id();
     let oid = update_value.object_id.unwrap();

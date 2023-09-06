@@ -7,10 +7,7 @@ use crate::token::tokens::UserToken;
 use anyhow::anyhow;
 use anyhow::Result;
 
-pub async fn create_task<'a, 'b>(
-    ut: &UserToken,
-    create_task: &'b CreateTask<'a>,
-) -> Result<models::Task> {
+pub async fn create_task(ut: &UserToken, create_task: &CreateTask<'_>) -> Result<models::Task> {
     let url = format!("{0}/task/create?key=None&workspace=workspace/{1}&project=project/{2}&projectScopeUp=false&projectScopeDown=true", config_env::rally_url(), config_env::workspace_id(), config_env::root_project_id() );
     let res = api::post(ut, &url, create_task.to_json_string()).await?;
     match res.get_object() {

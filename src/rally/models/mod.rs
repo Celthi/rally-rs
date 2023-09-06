@@ -102,7 +102,17 @@ impl ObjectModel {
             ObjectModel::TimeEntryValue(t) => &t._ref,
         }
     }
-
+    pub fn get_type(&self) -> &str {
+        match self {
+            ObjectModel::User(_) => "user",
+            ObjectModel::Defect(_) => "defect",
+            ObjectModel::HierarchicalRequirement(_) => "hierarchicalrequirement",
+            ObjectModel::TestSet(_) => "testset",
+            ObjectModel::TimeEntryItem(_) => "timeentryitem",
+            ObjectModel::Task(_) => "task",
+            ObjectModel::TimeEntryValue(_) => "timeentryvalue",
+        }
+    }
     pub fn get_project(&self) -> Project {
         match self {
             ObjectModel::User(u) => {
@@ -174,4 +184,13 @@ impl ObjectModel {
             _ => "Undefined",
         }
     }
+    pub fn get_ready_status(&self) -> bool {
+        match self {
+            ObjectModel::Defect(Defect { Ready, .. }) => *Ready,
+            ObjectModel::HierarchicalRequirement(HierarchicalRequirement { Ready, .. }) => *Ready,
+            ObjectModel::TestSet(TestSet { Ready, .. }) => *Ready,
+            _ => false,
+        }
+    }
+
 }

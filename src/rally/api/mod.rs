@@ -22,7 +22,7 @@ async fn get<T: DeserializeOwned>(ut: &UserToken, url: &str) -> Result<T> {
     get_results(resp).await
 }
 
-async fn post<'a, 'b>(ut: &'a UserToken, url: &'b str, body: String) -> Result<RallyResult> {
+async fn post(ut: &UserToken, url: &str, body: String) -> Result<RallyResult> {
     let client = reqwest::Client::new();
 
     let resp = client
@@ -35,7 +35,7 @@ async fn post<'a, 'b>(ut: &'a UserToken, url: &'b str, body: String) -> Result<R
     get_results(resp).await
 }
 
-async fn put<'a, 'b>(ut: &'a UserToken, url: &'b str, body: String) -> Result<RallyResult> {
+async fn put(ut: &UserToken, url: &str, body: String) -> Result<RallyResult> {
     let client = reqwest::Client::new();
 
     let resp = client
