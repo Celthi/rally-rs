@@ -6,13 +6,7 @@ use crate::rally::models::task::CreateTask;
 use crate::rally::models::{ObjectModel, Task, User};
 use crate::token::tokens::UserToken;
 use anyhow::Result;
-use chrono::prelude::*;
 
-fn get_task_name(date: &DateTime<Utc>) -> String {
-    let s = "Code review ".to_string();
-    let date = date.format("%Y-%m-%d").to_string();
-    s + &date
-}
 
 /// Select a task for the owner. If the owner has a task that is not completed, then
 /// return that task. Otherwise, create a new task for the owner.
@@ -30,11 +24,10 @@ pub async fn select_or_create_task(
     }
 
     // if we get here, then we need to create a new task
-    let task_date: DateTime<Utc> = Utc::now();
     let task_name = tp
         .task_name
         .clone()
-        .unwrap_or_else(|| get_task_name(&task_date));
+        .unwrap_or_else(|| tp.get_task_name());
     let ct = CreateTask::new(
         task_name,
         owner._ref.clone(),
