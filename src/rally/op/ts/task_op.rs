@@ -6,6 +6,7 @@ use crate::rally::models::task::CreateTask;
 use crate::rally::models::{ObjectModel, Task, User};
 use crate::token::tokens::UserToken;
 use anyhow::Result;
+use tracing::info;
 
 
 /// Select a task for the owner. If the owner has a task that is not completed, then
@@ -22,7 +23,7 @@ pub async fn select_or_create_task(
     if t.is_some() {
         return Ok(t.cloned());
     }
-
+    info!("Creating task for {}", tp.get_user_name());
     // if we get here, then we need to create a new task
     let task_name = tp
         .task_name

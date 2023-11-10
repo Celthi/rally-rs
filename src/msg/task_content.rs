@@ -2,6 +2,7 @@
 use std::collections::HashMap;
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
+use tracing::info;
 #[derive(Deserialize, Serialize, Default, Clone)]
 pub struct TaskContentMap {
     pub map: HashMap<String, HashMap<String, String>>,
@@ -13,6 +14,7 @@ static TASK_CONTENT_MAP: OnceCell<TaskContentMap> = OnceCell::new();
 
 impl TaskContentMap {
     pub fn get_task_content(&self, source: &str, text: &str) -> Option<String> {
+        info!("source: {}, text: {}", source, text);
         let text = text.to_lowercase();
         let map = self.map.get(source)?;
         for (key, value) in map {
