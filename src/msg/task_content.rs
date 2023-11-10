@@ -13,6 +13,7 @@ static TASK_CONTENT_MAP: OnceCell<TaskContentMap> = OnceCell::new();
 
 impl TaskContentMap {
     pub fn get_task_content(&self, source: &str, text: &str) -> Option<String> {
+        let text = text.to_lowercase();
         let map = self.map.get(source)?;
         for (key, value) in map {
             if text.contains(key) {
