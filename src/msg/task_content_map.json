@@ -1,0 +1,9 @@
+{
+    "github": {
+        "thanks": "Code Review"
+    },
+    "rally" : {
+        "root cause": "Root Cause Analysis",
+        "update": "Investigate the issue"
+    }
+}

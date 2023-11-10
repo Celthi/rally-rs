@@ -1,11 +1,6 @@
-use serde::{Deserialize, Serialize};
+use super::task_content::TaskContentMap;
 use chrono::prelude::*;
-
-fn get_task_name(date: &DateTime<Utc>) -> String {
-    let s = "Code review ".to_string();
-    let date = date.format("%Y-%m-%d").to_string();
-    s + &date
-}
+use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize, Default, Clone)]
 pub struct TimeSpent {
     user: String,
@@ -48,6 +43,9 @@ impl TimeSpent {
                 if let Some(value) = self.get_task_name_from_source_and_text(s) {
                     let mut name = self.user.clone();
                     name.push_str(&value);
+                    if self.source.as_deref().unwrap().contains("github") {
+                        name.push_str(Utc::now().format("%Y-%m-%d").to_string().as_str());
+                    }
                     return name;
                 }
                 "undefined".to_string()
@@ -57,22 +55,8 @@ impl TimeSpent {
     }
 
     fn get_task_name_from_source_and_text(&self, s: &String) -> Option<String> {
-        if s == "github" {
-            return Some(get_task_name(&Utc::now()));
-        }
-        if s == "rally" {
-            if self.text.is_some() {
-                let text = self.text.as_deref().unwrap().to_lowercase();
-                if text.contains("root cause") {
-                    return Some("Root cause analysis".to_string());
-                }
-                if text.contains("Update") {
-                    return Some("Investigated the issue".to_string());
-                }
-            }
-            return Some("Review and support".to_string());
-        }
-        None
+        let map = TaskContentMap::global();
+        map.get_task_content(s, self.text.as_deref()?)
     }
     pub fn get_source(&self) -> Option<&str> {
         self.source.as_deref()
