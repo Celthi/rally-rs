@@ -40,10 +40,11 @@ impl TimeSpent {
         }
         if self.source.is_some() {
             if let Some(value) = self.get_task_name_from_source_and_text() {
-                let mut name = self.user.clone();
+                let mut name = self.user.clone().split('@').next().unwrap_or("TNT").to_string();
+                name.push(' ');
                 name.push_str(&value);
                 if self.source.as_deref().unwrap().contains("github") {
-                    name.push_str(Utc::now().format("%Y-%m-%d").to_string().as_str());
+                    name.push_str(Utc::now().format(" %Y-%m-%d").to_string().as_str());
                 }
                 return name;
             }
