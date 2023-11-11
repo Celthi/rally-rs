@@ -4,6 +4,7 @@
     },
     "rally" : {
         "root cause": "Root Cause Analysis",
-        "update": "Investigate the issue"
+        "update": "Investigate the issue",
+        "could you": "First look and triage the issue"
     }
 }
