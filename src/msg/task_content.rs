@@ -48,14 +48,6 @@ impl TaskContentMap {
 #[cfg(test)]
 mod test {
     use super::*;
-    // #[test]
-    // fn test_get_task_content() {
-    //     TaskContentMap::new();
-    //     let source = "github";
-    //     let text = "thanks";
-    //     let task_name = TaskContentMap::global().get_task_content(source, text);
-    //     assert_eq!(task_name, Some("Code Review".to_string()));
-    // }
     #[test]
     fn test_global() {
         let source = "rally";

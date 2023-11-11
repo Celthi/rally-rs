@@ -50,12 +50,12 @@ async fn add_to_work_product(
 ) -> Result<(), anyhow::Error> {
     let (task, item) =
         entry::get_task_and_time_entry_item(ut, task_date, wp_id, work_product, tp).await?;
-    if item.is_some() && task.is_some() {
-        let task = task.unwrap();
-        let item = item.unwrap();
-        entry::add_time_entry_value(&item, ut, task_date, tp, work_product).await?;
-        let todo = task.ToDo.map(|t| t - tp.get_time_spent()).unwrap_or(0.0);
-        update_task(ut, &task, todo).await?;
+    if let Some(item) = item {
+        if let Some(task) = task {
+            entry::add_time_entry_value(&item, ut, task_date, tp, work_product).await?;
+            let todo = task.ToDo.map(|t| t - tp.get_time_spent()).unwrap_or(0.0);
+            update_task(ut, &task, todo).await?;
+        }
     } else {
         info!("Cannot add task and time item for {wp_id}");
     };

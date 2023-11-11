@@ -24,9 +24,9 @@ pub async fn get_rally_token(user_name: &str) -> Result<UserToken> {
     )
     .await?;
     let s = db.get_rally_token(user_name).await?;
-    if s.is_some() {
+    if let Some(s) = s {
         let mc = new_magic_crypt!(config_env::get_encrypt_key(), 256);
-        if let Ok(s) = mc.decrypt_base64_to_string(s.unwrap()) {
+        if let Ok(s) = mc.decrypt_base64_to_string(s) {
             Ok(UserToken::new(user_name.to_string(), s))
         } else {
             Err(anyhow::anyhow!("token not correctly encrypted!"))

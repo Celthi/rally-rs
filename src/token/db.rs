@@ -28,7 +28,6 @@ impl DB {
                 eprintln!("connection error: {}", e);
             }
         });
-        let client = client;
 
         Ok(DB { client })
     }

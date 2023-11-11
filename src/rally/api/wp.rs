@@ -25,8 +25,8 @@ pub async fn get_wp(ut: &UserToken, formatted_id: &str) -> Result<ObjectModel> {
 
     let res = super::get::<RallyResult>(ut, &url).await?;
     let obj = res.get_object();
-    if obj.is_some() {
-        Ok(obj.unwrap())
+    if let Some(obj) = obj {
+        Ok(obj)
     } else {
         Err(anyhow!("No US, DE, TS found for {}. \r\n", formatted_id))
     }
@@ -43,8 +43,8 @@ pub async fn update_wp(ut: &UserToken, wp: &ObjectModel, body: String) -> Result
     );
     let res = super::post(ut, &url, body).await?;
     let obj = res.get_object();
-    if obj.is_some() {
-        Ok(obj.unwrap())
+    if let Some(obj) = obj {
+        Ok(obj)
     } else {
         Err(anyhow!(
             "No US, DE, TS found for {}. \r\n",

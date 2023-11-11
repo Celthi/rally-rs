@@ -23,88 +23,70 @@ pub struct ConfigEnv {
 
 impl ConfigEnv {
     pub fn new() -> Result<ConfigEnv> {
-        let db_host = env::var("DB_HOST");
-        if db_host.is_err() {
+        let Ok(db_host) = env::var("DB_HOST") else {
             return Err(anyhow!(
                 "DB Host is required, please provide it by env variable DB_HOST"
             ));
-        }
-
+        };
         let db_port = if env::var("DB_PORT").is_err() {
             Some("5432".to_string())
         } else {
             None
         };
-
-        let db_user = env::var("DB_USER");
-
-        if db_user.is_err() {
+        let Ok(db_user) = env::var("DB_USER") else {
             return Err(anyhow!(
                 "DB port is required, please provide it by env variable DB_USER"
             ));
-        }
-        let db_password = env::var("DB_PASSWORD");
-
-        if db_password.is_err() {
+        };
+        let Ok(db_password) = env::var("DB_PASSWORD") else {
             return Err(anyhow!(
                 "DB port is required, please provide it by env variable DB_PASSWORD"
             ));
-        }
-        let github_token = env::var("GITHUB_TOKEN");
-        if github_token.is_err() {
+        };
+        let Ok(github_token) = env::var("GITHUB_TOKEN") else {
             return Err(anyhow!(
                 "GITHUB_TOKEN is required, please provide it by env variable GITHUB_TOKEN"
             ));
-        }
-
-        let kafka_broker_list = env::var("KAFKA_BROKER_LIST");
-        if kafka_broker_list.is_err() {
+        };
+        let Ok(kafka_broker_list) = env::var("KAFKA_BROKER_LIST") else {
             return Err(anyhow!(
                 "KAFKA_BROKER_LIST is required, please provide it by env variable KAFKA_BROKER_LIST like localhost:9092"
             ));
-        }
-
-        let mut time_spent_topic = env::var("KAFKA_TP_TOPIC");
-        if time_spent_topic.is_err() {
-            time_spent_topic = Ok("time_spent".to_string());
-        }
-        let mut consumer_group_id = env::var("KAFKA_TP_TOPIC");
-        if consumer_group_id.is_err() {
-            consumer_group_id = Ok("rally_consume".to_string());
-        }
-        let encrypt_key = env::var("ENCRYPT_KEY");
-        if encrypt_key.is_err() {
+        };
+        let time_spent_topic = env::var("KAFKA_TP_TOPIC").unwrap_or("time_spent".to_string());
+        let consumer_group_id = env::var("KAFKA_TP_TOPIC").unwrap_or("rally_consume".to_string());
+        let Ok(encrypt_key) = env::var("ENCRYPT_KEY") else {
             return Err(anyhow!(
                 "ENCRYPT_KEY is required, please provide it by env variable ENCRYPT_KEY"
             ));
-        }
+        };
         let github_url =
             env::var("GITHUB_URL").unwrap_or_else(|_| "https://api.github.com/".to_string());
         let doc_link =
             env::var("TNT_DOC_LINK").unwrap_or_else(|_| "https://api.github.com/".to_string());
-        let rally_url = env::var("RALLY_URL");
-        if rally_url.is_err() {
+        let Ok(rally_url) = env::var("RALLY_URL") else {
             return Err(anyhow!(
                 "RALLY_URL is required, please provide it by env variable RALLY_URL"
             ));
-        }
+        };
         let workspace_id =
             env::var("RALLY_WORKSPACE_ID").unwrap_or_else(|_| "27397600726".to_string());
         let root_project_id =
             env::var("RALLY_ROOT_PROJECT_ID").unwrap_or_else(|_| "40120756498".to_string());
+
         Ok(ConfigEnv {
-            db_host: db_host.unwrap(),
+            db_host,
             db_port,
-            db_user: db_user.unwrap(),
-            db_password: db_password.unwrap(),
-            github_token: github_token.unwrap(),
-            kafka_broker_list: kafka_broker_list.unwrap(),
-            time_spent_topic: time_spent_topic.unwrap(),
-            consumer_group_id: consumer_group_id.unwrap(),
-            encrypt_key: encrypt_key.unwrap(),
+            db_user,
+            db_password,
+            github_token,
+            kafka_broker_list,
+            time_spent_topic,
+            consumer_group_id,
+            encrypt_key,
             github_url,
             doc_link,
-            rally_url: rally_url.unwrap(),
+            rally_url,
             workspace_id,
             root_project_id,
         })
