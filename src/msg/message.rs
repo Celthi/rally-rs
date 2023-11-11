@@ -52,8 +52,7 @@ impl TimeSpent {
     }
 
     fn get_task_name_from_source_and_text(&self) -> Option<String> {
-        let map = TaskContentMap::global();
-        map.get_task_content(self.source.as_deref()?, self.text.as_deref()?)
+        Some(TaskContentMap::get_task_name(self.source.as_deref()?, self.text.as_deref()?))
     }
     pub fn get_source(&self) -> Option<&str> {
         self.source.as_deref()

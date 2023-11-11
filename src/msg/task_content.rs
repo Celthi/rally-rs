@@ -7,12 +7,25 @@ pub struct TaskContentMap {
     #[serde(flatten)]
     pub map: HashMap<String, HashMap<String, String>>,
 }
+impl TaskContentMap {
+    pub fn from_file() -> Self {
+        let s = std::fs::read_to_string("task_content_map.json")
+            .expect("There should be a task_content_map.json file in the current directory");
+        serde_json::from_str::<TaskContentMap>(&s)
+            .expect("There should be a task_content_map.json file in the current directory")
+    }
+}
 
-// create a global instance of the map
-static TASK_CONTENT_MAP: OnceCell<TaskContentMap> = OnceCell::new();
+fn global_task_content_map() -> &'static TaskContentMap {
+    static INSTANCE: OnceCell<TaskContentMap> = OnceCell::new();
+    INSTANCE.get_or_init(|| {
+        TaskContentMap::from_file()
+    })
+}
+
 
 impl TaskContentMap {
-    pub fn get_task_content(&self, source: &str, text: &str) -> Option<String> {
+    fn get_task_content(&self, source: &str, text: &str) -> Option<String> {
         info!("source: {}, text: {}", source, text);
         let text = text.to_lowercase();
         let map = self.map.get(source)?;
@@ -23,19 +36,12 @@ impl TaskContentMap {
         }
         None
     }
-    /// read the map from json file task_content_map.json
-    pub fn new() {
-        let s = include_str!("task_content_map.json");
-        let map = serde_json::from_str::<TaskContentMap>(s)
-            .expect("There should be a task_content_map.json file in the current directory");
-        TASK_CONTENT_MAP
-            .set(map)
-            .expect("task content map to be initialized");
-    }
-    pub fn global() -> &'static TaskContentMap {
-        TASK_CONTENT_MAP
-            .get()
-            .expect("task content to be initialized")
+
+    pub fn get_task_name(source: &str, text: &str) -> String {
+        if let Some(value) = global_task_content_map().get_task_content(source, text) {
+            return value;
+        }
+        "undefined".to_string()
     }
 }
 
@@ -52,15 +58,13 @@ mod test {
     // }
     #[test]
     fn test_global() {
-        TaskContentMap::new();
-        let map = TaskContentMap::global();
         let source = "rally";
         let text = "update";
-        let task_name = map.get_task_content(source, text);
-        assert_eq!(task_name, Some("Investigate the issue".to_string()));
+        let task_name = TaskContentMap::get_task_name(source, text);
+        assert_eq!(task_name, "Investigate the issue".to_string());
         let source = "github";
         let text = "thanks";
-        let task_name = TaskContentMap::global().get_task_content(source, text);
-        assert_eq!(task_name, Some("Code Review".to_string()));
+        let task_name = TaskContentMap::get_task_name(source, text);
+        assert_eq!(task_name, "Code Review".to_string());
     }
 }

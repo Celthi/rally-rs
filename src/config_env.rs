@@ -3,7 +3,6 @@ use once_cell::sync::OnceCell;
 use std::env;
 use std::process;
 
-use crate::msg::task_content::TaskContentMap;
 #[derive(Debug)]
 pub struct ConfigEnv {
     pub db_host: String,
@@ -187,7 +186,6 @@ pub fn root_project_id() -> &'static str {
 }
 
 pub fn ensure_config() {
-    TaskContentMap::new();
     match ConfigEnv::new() {
         Ok(c) => {
             if let Err(e) = CONFIG.set(c) {
