@@ -6,7 +6,7 @@ if [[ $? -ne 0 ]]; then
     echo "Build failed"
     exit 1
 fi
-if [[ -z $VIEW]]; then
+if [[ -z $VIEW ]]; then
     kubectl set image  deployment/tnt tnt=tnt:$version
 else
     $VIEW/kubectl set image  deployment/tnt tnt=tnt:$version
