@@ -7,5 +7,6 @@ pub struct User {
     pub c_EmployeeID: Option<String>,
     pub UserName: String,
     pub DefaultProject: Option<Project>,
+    #[serde(flatten)]
     pub persistableObject: PersistableObject,
 }
