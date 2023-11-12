@@ -7,4 +7,6 @@ pub struct TestSet {
     #[serde(flatten)]
     pub artifact: Artifact,
     pub Tasks: Option<EmbeddedObject>,
+    pub ScheduleState: String,
+
 }

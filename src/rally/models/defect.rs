@@ -7,4 +7,6 @@ pub struct Defect {
     #[serde(flatten)]
     pub artifact: Artifact,
     pub Tasks: Option<EmbeddedObject>,
+    pub ScheduleState: String,
+
 }

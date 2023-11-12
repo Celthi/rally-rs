@@ -32,7 +32,6 @@ pub struct Artifact {
     pub FormattedID: String,
     pub Project: Project,
     pub Ready: bool,
-    pub ScheduleState: String,
     pub Owner: Option<EmbeddedObject>,
 }
 
@@ -293,18 +292,11 @@ impl ObjectModel {
 
     pub fn get_schedule_state(&self) -> &str {
         match self {
-            ObjectModel::Defect(Defect {
-                artifact: Artifact { ScheduleState, .. },
-                ..
-            }) => ScheduleState,
+            ObjectModel::Defect(Defect { ScheduleState, .. }) => ScheduleState,
             ObjectModel::HierarchicalRequirement(HierarchicalRequirement {
-                artifact: Artifact { ScheduleState, .. },
-                ..
+                ScheduleState, ..
             }) => ScheduleState,
-            ObjectModel::TestSet(TestSet {
-                artifact: Artifact { ScheduleState, .. },
-                ..
-            }) => ScheduleState,
+            ObjectModel::TestSet(TestSet { ScheduleState, .. }) => ScheduleState,
             _ => "Undefined",
         }
     }
