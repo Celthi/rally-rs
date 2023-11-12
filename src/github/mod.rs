@@ -42,3 +42,11 @@ async fn post_issue_comment_internal(
         .await?;
     Ok(())
 }
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn test_post_issue_comment() {
+        // to do add test configuration
+    }
+}

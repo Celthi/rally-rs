@@ -1,5 +1,5 @@
 #!/bin/bash
-version=2.3.6
+version=2.3.9
 cargo check && docker build --network=host . -t tnt:$version
 sleep 1 # wait for docker to finish publish image
 if [[ $? -ne 0 ]]; then

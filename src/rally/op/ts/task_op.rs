@@ -31,7 +31,7 @@ pub async fn select_or_create_task(
         .unwrap_or_else(|| tp.get_task_name());
     let ct = CreateTask::new(
         task_name,
-        owner._ref.clone(),
+        owner.persistableObject._ref.clone(),
         tp.get_time_spent(),
         work_product,
     );
@@ -46,9 +46,9 @@ pub fn select_task_for_owner<'a>(tasks: &'a [Task], owner: &User) -> Option<&'a 
 }
 
 fn owned_by_user(t: &Task, owner: &User) -> bool {
-    t.Owner
+    t.artifact.Owner
         .as_ref()
         .and_then(|o| o._refObjectUUID.as_deref())
-        .map(|uuid| uuid == owner._refObjectUUID)
+        .map(|uuid| uuid == owner.persistableObject._refObjectUUID)
         .unwrap_or(false)
 }

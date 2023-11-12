@@ -38,22 +38,30 @@ impl TimeSpent {
         if self.task_name.is_some() {
             return self.task_name.as_deref().unwrap().to_string();
         }
-        if self.source.is_some() {
-            if let Some(value) = self.get_task_name_from_source_and_text() {
-                let mut name = self.user.clone().split('@').next().unwrap_or("TNT").to_string();
-                name.push(' ');
-                name.push_str(&value);
-                if self.source.as_deref().unwrap().contains("github") {
-                    name.push_str(Utc::now().format(" %Y-%m-%d").to_string().as_str());
-                }
-                return name;
+        if let Some(value) = self.get_task_name_from_source_and_text() {
+            let mut name = self
+                .user
+                .clone()
+                .split('@')
+                .next()
+                .unwrap_or("TNT")
+                .to_string();
+            name.push(' ');
+            name.push_str(&value);
+            if self.source.as_deref().unwrap().contains("github") {
+                name.push_str(Utc::now().format(" %Y-%m-%d").to_string().as_str());
             }
+            return name;
         }
-        "undefined".to_string()
+
+        "Review and Support".to_string()
     }
 
     fn get_task_name_from_source_and_text(&self) -> Option<String> {
-        Some(TaskContentMap::get_task_name(self.source.as_deref()?, self.text.as_deref()?))
+        Some(TaskContentMap::get_task_name(
+            self.source.as_deref()?,
+            self.text.as_deref()?,
+        ))
     }
     pub fn get_source(&self) -> Option<&str> {
         self.source.as_deref()

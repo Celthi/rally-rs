@@ -34,14 +34,14 @@ pub async fn create_update_value<'a>(
     task_date: DateTime<Utc>,
     tp: &TimeSpent,
 ) -> Result<UpdateValue<'a>, anyhow::Error> {
-    let values = api::time::get_time_entry_values(ut, &item._ref).await?;
-    let mut update_value = UpdateValue::new(task_date, tp.get_time_spent(), &item._ref);
+    let values = api::time::get_time_entry_values(ut, &item.persistableObject._ref).await?;
+    let mut update_value = UpdateValue::new(task_date, tp.get_time_spent(), &item.persistableObject._ref);
     values.iter().for_each(|i| {
         if i.DateVal.year() == task_date.year()
             && i.DateVal.month() == task_date.month()
             && i.DateVal.day() == task_date.day()
         {
-            update_value.set_object_id(i.ObjectID);
+            update_value.set_object_id(i.persistableObject.ObjectID);
             update_value.add_hours(i.Hours);
         }
     });

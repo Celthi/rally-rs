@@ -15,6 +15,37 @@ mod testset;
 pub use testset::TestSet;
 
 #[allow(non_snake_case)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct PersistableObject {
+    pub ObjectID: u64,
+    pub _refObjectUUID: String,
+    pub _ref: String,
+}
+
+/// some parent entity is collapsed into this struct
+#[allow(non_snake_case)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct Artifact {
+    #[serde(flatten)]
+    pub persistableObject: PersistableObject,
+    pub Name: String,
+    pub FormattedID: String,
+    pub Project: Project,
+    pub Ready: bool,
+    pub ScheduleState: String,
+    pub Owner: Option<EmbeddedObject>,
+}
+
+#[allow(non_snake_case)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct EmbeddedObject {
+    pub _ref: String,
+    pub _refObjectUUID: Option<String>,
+    pub _refObjectName: Option<String>,
+    pub _type: Option<String>,
+}
+
+#[allow(non_snake_case)]
 #[derive(Deserialize, Serialize)]
 pub enum RallyResult {
     QueryResult(QueryResult),
@@ -65,15 +96,6 @@ pub enum SingleObjectModel {
     TimeEntryValue(TimeEntryValue),
 }
 
-#[allow(non_snake_case)]
-#[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct EmbeddedObject {
-    pub _ref: String,
-    pub _refObjectUUID: Option<String>,
-    pub _refObjectName: Option<String>,
-    pub _type: Option<String>,
-}
-
 impl RallyResult {
     pub fn get_object(&self) -> Option<ObjectModel> {
         match self {
@@ -93,13 +115,13 @@ impl RallyResult {
 impl ObjectModel {
     pub fn get_ref(&self) -> &str {
         match self {
-            ObjectModel::User(u) => &u._ref,
-            ObjectModel::Defect(d) => &d._ref,
-            ObjectModel::HierarchicalRequirement(h) => &h._ref,
-            ObjectModel::TestSet(t) => &t._ref,
-            ObjectModel::TimeEntryItem(t) => &t._ref,
-            ObjectModel::Task(t) => &t._ref,
-            ObjectModel::TimeEntryValue(t) => &t._ref,
+            ObjectModel::User(u) => &u.persistableObject._ref,
+            ObjectModel::Defect(d) => &d.artifact.persistableObject._ref,
+            ObjectModel::HierarchicalRequirement(h) => &h.artifact.persistableObject._ref,
+            ObjectModel::TestSet(t) => &t.artifact.persistableObject._ref,
+            ObjectModel::TimeEntryItem(t) => &t.persistableObject._ref,
+            ObjectModel::Task(t) => &t.artifact.persistableObject._ref,
+            ObjectModel::TimeEntryValue(t) => &t.persistableObject._ref,
         }
     }
     pub fn get_type(&self) -> &str {
@@ -122,75 +144,185 @@ impl ObjectModel {
                     Project::default()
                 }
             }
-            ObjectModel::Defect(d) => d.Project.to_owned(),
-            ObjectModel::HierarchicalRequirement(HierarchicalRequirement { Project, .. }) => {
-                Project.to_owned()
-            }
-            ObjectModel::TestSet(TestSet { Project, .. }) => Project.to_owned(),
+            ObjectModel::Defect(d) => d.artifact.Project.to_owned(),
+            ObjectModel::HierarchicalRequirement(
+                HierarchicalRequirement {
+                    artifact: Artifact { Project, .. },
+                    ..
+                },
+                ..,
+            ) => Project.to_owned(),
+            ObjectModel::TestSet(
+                TestSet {
+                    artifact: Artifact { Project, .. },
+                    ..
+                },
+                ..,
+            ) => Project.to_owned(),
             ObjectModel::TimeEntryItem(TimeEntryItem { Project, .. }) => Project.to_owned(),
-            ObjectModel::Task(Task { Project, .. }) => Project.to_owned(),
+            ObjectModel::Task(
+                Task {
+                    artifact: Artifact { Project, .. },
+                    ..
+                },
+                ..,
+            ) => Project.to_owned(),
             ObjectModel::TimeEntryValue(TimeEntryValue { .. }) => Project::default(),
         }
     }
 
     pub fn get_object_id(&self) -> u64 {
         match self {
-            ObjectModel::User(User { ObjectID, .. }) => *ObjectID,
-            ObjectModel::Defect(Defect { ObjectID, .. }) => *ObjectID,
-            ObjectModel::HierarchicalRequirement(HierarchicalRequirement { ObjectID, .. }) => {
-                *ObjectID
-            }
-            ObjectModel::TestSet(TestSet { ObjectID, .. }) => *ObjectID,
-            ObjectModel::TimeEntryItem(TimeEntryItem { ObjectID, .. }) => *ObjectID,
-            ObjectModel::Task(Task { ObjectID, .. }) => *ObjectID,
-            ObjectModel::TimeEntryValue(TimeEntryValue { ObjectID, .. }) => *ObjectID,
+            ObjectModel::User(User {
+                persistableObject: PersistableObject { ObjectID, .. },
+                ..
+            }) => *ObjectID,
+            ObjectModel::Defect(Defect {
+                artifact:
+                    Artifact {
+                        persistableObject: PersistableObject { ObjectID, .. },
+                        ..
+                    },
+                ..
+            }) => *ObjectID,
+            ObjectModel::HierarchicalRequirement(HierarchicalRequirement {
+                artifact:
+                    Artifact {
+                        persistableObject: PersistableObject { ObjectID, .. },
+                        ..
+                    },
+                ..
+            }) => *ObjectID,
+            ObjectModel::TestSet(TestSet {
+                artifact:
+                    Artifact {
+                        persistableObject: PersistableObject { ObjectID, .. },
+                        ..
+                    },
+                ..
+            }) => *ObjectID,
+            ObjectModel::TimeEntryItem(TimeEntryItem {
+                persistableObject: PersistableObject { ObjectID, .. },
+                ..
+            }) => *ObjectID,
+            ObjectModel::Task(Task {
+                artifact:
+                    Artifact {
+                        persistableObject: PersistableObject { ObjectID, .. },
+                        ..
+                    },
+                ..
+            }) => *ObjectID,
+            ObjectModel::TimeEntryValue(TimeEntryValue {
+                persistableObject: PersistableObject { ObjectID, .. },
+                ..
+            }) => *ObjectID,
         }
     }
 
     pub fn get_ref_object_uuid(&self) -> &str {
         match self {
-            ObjectModel::User(User { _refObjectUUID, .. }) => _refObjectUUID,
-            ObjectModel::Defect(Defect { _refObjectUUID, .. }) => _refObjectUUID,
-            ObjectModel::HierarchicalRequirement(HierarchicalRequirement {
-                _refObjectUUID,
+            ObjectModel::User(User {
+                persistableObject: PersistableObject { _refObjectUUID, .. },
                 ..
             }) => _refObjectUUID,
-            ObjectModel::TestSet(TestSet { _refObjectUUID, .. }) => _refObjectUUID,
-            ObjectModel::TimeEntryItem(TimeEntryItem { _refObjectUUID, .. }) => _refObjectUUID,
-            ObjectModel::Task(Task { _refObjectUUID, .. }) => _refObjectUUID,
-            ObjectModel::TimeEntryValue(TimeEntryValue { _refObjectUUID, .. }) => _refObjectUUID,
+            ObjectModel::Defect(Defect {
+                artifact:
+                    Artifact {
+                        persistableObject: PersistableObject { _refObjectUUID, .. },
+                        ..
+                    },
+                ..
+            }) => _refObjectUUID,
+            ObjectModel::HierarchicalRequirement(HierarchicalRequirement {
+                artifact:
+                    Artifact {
+                        persistableObject: PersistableObject { _refObjectUUID, .. },
+                        ..
+                    },
+                ..
+            }) => _refObjectUUID,
+            ObjectModel::TestSet(TestSet {
+                artifact:
+                    Artifact {
+                        persistableObject: PersistableObject { _refObjectUUID, .. },
+                        ..
+                    },
+                ..
+            }) => _refObjectUUID,
+            ObjectModel::TimeEntryItem(TimeEntryItem {
+                persistableObject: PersistableObject { _refObjectUUID, .. },
+                ..
+            }) => _refObjectUUID,
+            ObjectModel::Task(Task {
+                artifact:
+                    Artifact {
+                        persistableObject: PersistableObject { _refObjectUUID, .. },
+                        ..
+                    },
+                ..
+            }) => _refObjectUUID,
+            ObjectModel::TimeEntryValue(TimeEntryValue {
+                persistableObject: PersistableObject { _refObjectUUID, .. },
+                ..
+            }) => _refObjectUUID,
         }
     }
 
     pub fn get_formatted_id(&self) -> String {
         match self {
-            ObjectModel::Defect(Defect { FormattedID, .. }) => FormattedID.to_owned(),
-            ObjectModel::HierarchicalRequirement(HierarchicalRequirement {
-                FormattedID, ..
+            ObjectModel::Defect(Defect {
+                artifact: Artifact { FormattedID, .. },
+                ..
             }) => FormattedID.to_owned(),
-            ObjectModel::TestSet(TestSet { FormattedID, .. }) => FormattedID.to_owned(),
-            ObjectModel::Task(Task { FormattedID, .. }) => FormattedID.to_owned(),
+            ObjectModel::HierarchicalRequirement(HierarchicalRequirement {
+                artifact: Artifact { FormattedID, .. },
+                ..
+            }) => FormattedID.to_owned(),
+            ObjectModel::TestSet(TestSet {
+                artifact: Artifact { FormattedID, .. },
+                ..
+            }) => FormattedID.to_owned(),
+            ObjectModel::Task(Task {
+                artifact: Artifact { FormattedID, .. },
+                ..
+            }) => FormattedID.to_owned(),
             _ => "no id".to_string(),
         }
     }
 
     pub fn get_schedule_state(&self) -> &str {
         match self {
-            ObjectModel::Defect(Defect { ScheduleState, .. }) => ScheduleState,
-            ObjectModel::HierarchicalRequirement(HierarchicalRequirement {
-                ScheduleState, ..
+            ObjectModel::Defect(Defect {
+                artifact: Artifact { ScheduleState, .. },
+                ..
             }) => ScheduleState,
-            ObjectModel::TestSet(TestSet { ScheduleState, .. }) => ScheduleState,
+            ObjectModel::HierarchicalRequirement(HierarchicalRequirement {
+                artifact: Artifact { ScheduleState, .. },
+                ..
+            }) => ScheduleState,
+            ObjectModel::TestSet(TestSet {
+                artifact: Artifact { ScheduleState, .. },
+                ..
+            }) => ScheduleState,
             _ => "Undefined",
         }
     }
     pub fn get_ready_status(&self) -> bool {
         match self {
-            ObjectModel::Defect(Defect { Ready, .. }) => *Ready,
-            ObjectModel::HierarchicalRequirement(HierarchicalRequirement { Ready, .. }) => *Ready,
-            ObjectModel::TestSet(TestSet { Ready, .. }) => *Ready,
+            ObjectModel::Defect(Defect {
+                artifact: Artifact { Ready, .. },
+                ..
+            }) => *Ready,
+            ObjectModel::HierarchicalRequirement(HierarchicalRequirement {
+                artifact: Artifact { Ready, .. },
+                ..
+            }) => *Ready,
+            ObjectModel::TestSet(TestSet {
+                artifact: Artifact { Ready, .. },
+                ..
+            }) => *Ready,
             _ => false,
         }
     }
-
 }

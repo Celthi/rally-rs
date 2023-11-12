@@ -24,13 +24,13 @@ pub async fn update_task(
     task: &models::Task,
     todo: f32,
 ) -> Result<models::ObjectModel> {
-    let oid = task.ObjectID;
+    let oid = task.artifact.persistableObject.ObjectID;
     let url = format!("{0}/task/{oid}?key=None&workspace=workspace/{1}&project=project/{2}&projectScopeUp=false&projectScopeDown=true", config_env::rally_url(), config_env::workspace_id(), config_env::root_project_id());
     let mut state = "In-Progress".to_string();
     if todo <= 0f32 {
         state = "Completed".to_string();
     }
-    let update_task_value = UpdateTask::new(state, task.FormattedID.clone(), todo, task.ObjectID);
+    let update_task_value = UpdateTask::new(state, task.artifact.FormattedID.clone(), todo, task.artifact.persistableObject.ObjectID);
     let res = api::post(ut, &url, update_task_value.to_json_string()).await?;
     match res.get_object() {
         Some(o) => Ok(o),
@@ -51,10 +51,10 @@ pub async fn get_tasks(ut: &UserToken, wp: &models::ObjectModel) -> Result<Vec<m
     if tasks.is_none() {
         return Ok(vec![]);
     }
-    let models::RallyResult::QueryResult(q) =
-                api::get(ut, &tasks.as_ref().unwrap()._ref).await? else {
-                    return Err(anyhow!("Not task!"));
-                };
+    let models::RallyResult::QueryResult(q) = api::get(ut, &tasks.as_ref().unwrap()._ref).await?
+    else {
+        return Err(anyhow!("Not task!"));
+    };
 
     return Ok(q
         .Results

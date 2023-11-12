@@ -5,18 +5,12 @@ use serde::{Deserialize, Serialize};
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Task {
-    pub Name: String,
-    pub FormattedID: String,
-    pub Project: Project,
-    pub Ready: bool,
+    #[serde(flatten)]
+    pub artifact: Artifact,
     pub Estimate: Option<f32>,
     pub State: String,
     pub TimeSpent: f32,
     pub ToDo: Option<f32>,
-    pub _ref: String,
-    pub ObjectID: u64,
-    pub Owner: Option<EmbeddedObject>,
-    pub _refObjectUUID: String,
 }
 
 #[derive(Clone)]

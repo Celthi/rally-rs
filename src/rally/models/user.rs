@@ -7,7 +7,5 @@ pub struct User {
     pub c_EmployeeID: Option<String>,
     pub UserName: String,
     pub DefaultProject: Option<Project>,
-    pub _ref: String,
-    pub ObjectID: u64,
-    pub _refObjectUUID: String,
+    pub persistableObject: PersistableObject,
 }

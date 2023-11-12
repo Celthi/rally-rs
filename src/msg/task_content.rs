@@ -18,11 +18,8 @@ impl TaskContentMap {
 
 fn global_task_content_map() -> &'static TaskContentMap {
     static INSTANCE: OnceCell<TaskContentMap> = OnceCell::new();
-    INSTANCE.get_or_init(|| {
-        TaskContentMap::from_file()
-    })
+    INSTANCE.get_or_init(|| TaskContentMap::from_file())
 }
-
 
 impl TaskContentMap {
     fn get_task_content(&self, source: &str, text: &str) -> Option<String> {

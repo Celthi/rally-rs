@@ -8,19 +8,17 @@ use serde::{Deserialize, Serialize};
 pub struct TimeEntryItem {
     pub Project: Project,
     pub WorkProduct: EmbeddedObject,
-    pub _ref: String,
-    pub ObjectID: u64,
-    pub _refObjectUUID: String,
+    #[serde(flatten)]
+    pub persistableObject: PersistableObject,
     pub Task: EmbeddedObject,
 }
 
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct TimeEntryValue {
-    pub _ref: String,
+    #[serde(flatten)]
+    pub persistableObject: PersistableObject,
     pub TimeEntryItem: EmbeddedObject,
-    pub ObjectID: u64,
-    pub _refObjectUUID: String,
     pub DateVal: DateTime<Utc>,
     pub Hours: f32,
 }
@@ -61,7 +59,7 @@ impl<'a, 'b, 'c> CreateItem<'a, 'b, 'c> {
             self.project.get_id(),
             self.week_start_date.format("%Y-%m-%dT%H:%M:%S.%fZ"),
             self.work_product.get_ref(),
-            self.task._ref
+            self.task.artifact.persistableObject._ref
         )
     }
 }
