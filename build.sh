@@ -1,5 +1,5 @@
 #!/bin/bash
-version=2.3.13
+version=2.4.0
 docker build --network=host . -t tnt:$version
 sleep 1 # wait for docker to finish publish image
 if [[ $? -ne 0 ]]; then

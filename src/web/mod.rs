@@ -1,33 +1,28 @@
 use crate::{config_env, token::db};
 use anyhow::Result;
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
-use poem::{
-    handler, listener::TcpListener, middleware::Tracing, post, web::Json, EndpointExt, Route,
-    Server,
-};
+
+use axum::{routing::post, Json, Router};
+
 use serde::Deserialize;
 use tracing::error;
 
 #[tokio::main]
 pub async fn event_loop() -> Result<(), std::io::Error> {
-    if std::env::var_os("RUST_LOG").is_none() {
-        std::env::set_var("RUST_LOG", "poem=debug");
-    }
-    let router = Route::new();
-    let app = router
-        .at("/rally_token", post(save_rally_token))
-        .with(Tracing);
-    Server::new(TcpListener::bind("0.0.0.0:30814"))
-        .run(app)
-        .await
+    // build our application with a route
+    let app = Router::new().route("/rally_token", post(save_rally_token));
+
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:31430").await?;
+    axum::serve(listener, app).await
 }
+
 #[derive(Debug, Deserialize)]
 pub struct RallyTokenUpdate {
     user_name: String,
     token: String,
 }
-#[handler]
-async fn save_rally_token(req: Json<RallyTokenUpdate>) {
+
+async fn save_rally_token(Json(req): Json<RallyTokenUpdate>) {
     match insert_to_db(&req).await {
         Ok(()) => {}
         Err(e) => {
